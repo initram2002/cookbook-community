@@ -11,16 +11,16 @@ import kotlinx.coroutines.launch
 
 class CookBookCommunityApp : Application() {
 
-    val appContainer: AppContainer by lazy {
-        AppContainer()
-    }
+    lateinit var appContainer: AppContainer
+        private set
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
 
-        appContainer
+        appContainer = AppContainer()
+
         ensureSystemCollectionsForCurrentUser()
         seedFirestoreIfNeeded()
     }
