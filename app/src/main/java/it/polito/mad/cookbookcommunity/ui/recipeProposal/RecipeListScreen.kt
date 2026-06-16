@@ -81,6 +81,33 @@ fun RecipeListScreen(
                     }
                 }
 
+                uiState.errorMessage != null -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(24.dp)
+                        ) {
+                            Text(
+                                text = uiState.errorMessage,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.error
+                            )
+
+                            TextButton(
+                                onClick = {
+                                    onEvent(RecipeListEvent.DismissErrorMessage)
+                                }
+                            ) {
+                                Text("Dismiss")
+                            }
+                        }
+                    }
+                }
+
                 uiState.recipes.isEmpty() -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),

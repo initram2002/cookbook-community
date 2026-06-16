@@ -39,9 +39,12 @@ class FirestoreRecipeRepository(
     override fun getOwnedRecipeProposals(ownerId: String): Flow<List<RecipeProposal>> =
         collection
             .whereEqualTo(Recipe.OWNER_ID, ownerId)
-            .orderBy(Recipe.UPDATED_AT, Query.Direction.DESCENDING)
             .snapshots()
-            .map { snapshot -> snapshot.toObjects<RecipeProposal>() }
+            .map { snapshot ->
+                snapshot
+                    .toObjects<RecipeProposal>()
+                    .sortedByDescending { recipe -> recipe.updatedAt }
+            }
 
     override fun getRecipeProposalById(recipeId: String): Flow<RecipeProposal?> =
         collection

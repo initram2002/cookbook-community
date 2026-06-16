@@ -9,6 +9,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -69,14 +70,26 @@ class RecipeListViewModel(
         }
 
         loadRecipesJob = viewModelScope.launch {
-            repository.getOwnedRecipeProposals(event.ownerId).collect { recipes ->
-                _uiState.update {
-                    it.copy(
-                        recipes = recipes,
-                        isLoading = false
-                    )
+            repository
+                .getOwnedRecipeProposals(event.ownerId)
+                .catch {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            recipes = emptyList(),
+                            isLoading = false,
+                            errorMessage = "Unable to load recipes. Please try again."
+                        )
+                    }
                 }
-            }
+                .collect { recipes ->
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            recipes = recipes,
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    }
+                }
         }
     }
 
