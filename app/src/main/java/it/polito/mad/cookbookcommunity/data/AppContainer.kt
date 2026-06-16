@@ -23,43 +23,37 @@ import it.polito.mad.cookbookcommunity.domain.usecase.DeleteRecipeProposalUseCas
 import it.polito.mad.cookbookcommunity.session.SessionManager
 
 class AppContainer {
-    val authRepository: AuthRepository by lazy {
+    val authRepository: AuthRepository =
         FirebaseAuthRepository()
-    }
 
-    init {
-        SessionManager.init(authRepository)
-    }
-
-    val userProfileRepository: UserRepository by lazy {
-        FirestoreUserRepository()
-    }
-
-    val notificationRepository: NotificationRepository by lazy {
+    val notificationRepository: NotificationRepository =
         FirestoreNotificationRepository()
-    }
 
-    val reviewRepository: ReviewRepository by lazy {
-        FirestoreReviewRepository(notificationRepository)
-    }
+    val userProfileRepository: UserRepository =
+        FirestoreUserRepository()
 
-    val recipeRepository: RecipeRepository by lazy {
-        FirestoreRecipeRepository(notificationRepository)
-    }
-
-    val favoriteRepository: FavoriteRepository by lazy {
+    val favoriteRepository: FavoriteRepository =
         FirestoreFavoriteRepository()
-    }
 
-    val favoriteCollectionRepository: FavoriteCollectionRepository by lazy {
+    val favoriteCollectionRepository: FavoriteCollectionRepository =
         FirestoreFavoriteCollectionRepository()
-    }
 
-    val seedRepository: FirestoreSeedRepository by lazy {
+    val triedRecipeRepository: TriedRecipeRepository =
+        FirestoreTriedRecipeRepository()
+
+    val tipRepository: TipRepository =
+        FirestoreTipRepository()
+
+    val reviewRepository: ReviewRepository =
+        FirestoreReviewRepository(notificationRepository)
+
+    val recipeRepository: RecipeRepository =
+        FirestoreRecipeRepository(notificationRepository)
+
+    val seedRepository: FirestoreSeedRepository =
         FirestoreSeedRepository()
-    }
 
-    val deleteRecipeProposalUseCase: DeleteRecipeProposalUseCase by lazy {
+    val deleteRecipeProposalUseCase: DeleteRecipeProposalUseCase =
         DeleteRecipeProposalUseCase(
             recipeRepository = recipeRepository,
             reviewRepository = reviewRepository,
@@ -68,13 +62,8 @@ class AppContainer {
             tipRepository = tipRepository,
             triedRecipeRepository = triedRecipeRepository,
         )
-    }
 
-    val triedRecipeRepository: TriedRecipeRepository by lazy {
-        FirestoreTriedRecipeRepository()
-    }
-
-    val tipRepository: TipRepository by lazy {
-        FirestoreTipRepository()
+    init {
+        SessionManager.init(authRepository)
     }
 }
