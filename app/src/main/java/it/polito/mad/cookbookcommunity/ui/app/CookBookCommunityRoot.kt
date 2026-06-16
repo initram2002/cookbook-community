@@ -36,16 +36,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import it.polito.mad.cookbookcommunity.data.AppContainer
-import it.polito.mad.cookbookcommunity.data.auth.AuthRepository
-import it.polito.mad.cookbookcommunity.data.favorite.FavoriteCollectionRepository
-import it.polito.mad.cookbookcommunity.data.favorite.FavoriteRepository
-import it.polito.mad.cookbookcommunity.data.notification.NotificationRepository
-import it.polito.mad.cookbookcommunity.data.recipe.RecipeRepository
-import it.polito.mad.cookbookcommunity.data.repository.TipRepository
-import it.polito.mad.cookbookcommunity.data.repository.TriedRecipeRepository
-import it.polito.mad.cookbookcommunity.data.review.ReviewRepository
-import it.polito.mad.cookbookcommunity.data.user.UserRepository
-import it.polito.mad.cookbookcommunity.domain.usecase.DeleteRecipeProposalUseCase
 import it.polito.mad.cookbookcommunity.navigation.AdaptRecipeRoute
 import it.polito.mad.cookbookcommunity.navigation.AddReviewRoute
 import it.polito.mad.cookbookcommunity.navigation.AddTipRoute
@@ -96,35 +86,17 @@ fun CookBookCommunityRoot(
     appContainer: AppContainer,
     modifier: Modifier = Modifier,
 ) {
-    MainHost(
-        authRepository = appContainer.authRepository,
-        recipeRepository = appContainer.recipeRepository,
-        userProfileRepository = appContainer.userProfileRepository,
-        favoriteCollectionRepository = appContainer.favoriteCollectionRepository,
-        favoriteRepository = appContainer.favoriteRepository,
-        reviewRepository = appContainer.reviewRepository,
-        notificationRepository = appContainer.notificationRepository,
-        triedRecipeRepository = appContainer.triedRecipeRepository,
-        tipRepository = appContainer.tipRepository,
-        deleteRecipeProposalUseCase = appContainer.deleteRecipeProposalUseCase,
-        modifier = modifier,
-    )
-}
+    val authRepository = appContainer.authRepository
+    val recipeRepository = appContainer.recipeRepository
+    val userProfileRepository = appContainer.userProfileRepository
+    val favoriteCollectionRepository = appContainer.favoriteCollectionRepository
+    val favoriteRepository = appContainer.favoriteRepository
+    val reviewRepository = appContainer.reviewRepository
+    val notificationRepository = appContainer.notificationRepository
+    val triedRecipeRepository = appContainer.triedRecipeRepository
+    val tipRepository = appContainer.tipRepository
+    val deleteRecipeProposalUseCase = appContainer.deleteRecipeProposalUseCase
 
-@Composable
-private fun MainHost(
-    authRepository: AuthRepository,
-    recipeRepository: RecipeRepository,
-    userProfileRepository: UserRepository,
-    favoriteCollectionRepository: FavoriteCollectionRepository,
-    favoriteRepository: FavoriteRepository,
-    reviewRepository: ReviewRepository,
-    notificationRepository: NotificationRepository,
-    triedRecipeRepository: TriedRecipeRepository,
-    tipRepository: TipRepository,
-    deleteRecipeProposalUseCase: DeleteRecipeProposalUseCase,
-    modifier: Modifier = Modifier,
-) {
     val navCtrl_r = rememberNavController()
     val appNavigation = remember(navCtrl_r) {
         AppNavigation(navCtrl_r)
