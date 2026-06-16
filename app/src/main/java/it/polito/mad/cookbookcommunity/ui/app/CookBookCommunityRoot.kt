@@ -21,24 +21,21 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import it.polito.mad.cookbookcommunity.data.AppContainer
 import it.polito.mad.cookbookcommunity.navigation.AdaptRecipeRoute
-import it.polito.mad.cookbookcommunity.navigation.AddReviewRoute
-import it.polito.mad.cookbookcommunity.navigation.AddTipRoute
 import it.polito.mad.cookbookcommunity.navigation.AppNavHost
 import it.polito.mad.cookbookcommunity.navigation.AppNavigation
 import it.polito.mad.cookbookcommunity.navigation.AuthEntryPhotoRoleRoute
 import it.polito.mad.cookbookcommunity.navigation.AuthEntryPreferencesRoute
 import it.polito.mad.cookbookcommunity.navigation.AuthEntryRoute
-import it.polito.mad.cookbookcommunity.navigation.CollectionDetailNavRoute
 import it.polito.mad.cookbookcommunity.navigation.CreateRecipeRoute
 import it.polito.mad.cookbookcommunity.navigation.HomeRoute
-import it.polito.mad.cookbookcommunity.navigation.NotificationsRoute
 import it.polito.mad.cookbookcommunity.navigation.OwnProfileRoute
 import it.polito.mad.cookbookcommunity.navigation.PostLoginDestination
 import it.polito.mad.cookbookcommunity.navigation.RecipesListRoute
-import it.polito.mad.cookbookcommunity.navigation.SaveToCollectionDialogRoute
 import it.polito.mad.cookbookcommunity.navigation.SavedCollectionsRoute
 import it.polito.mad.cookbookcommunity.navigation.SignUpAccountRoute
-import it.polito.mad.cookbookcommunity.navigation.TriedRecipesRoute
+import it.polito.mad.cookbookcommunity.navigation.isProtectedRoute
+import it.polito.mad.cookbookcommunity.navigation.navigateAfterLogin
+import it.polito.mad.cookbookcommunity.navigation.postLoginDestinationForProtectedRoute
 import it.polito.mad.cookbookcommunity.session.SessionManager
 import it.polito.mad.cookbookcommunity.viewmodel.NewRecipeStep
 import kotlinx.coroutines.launch
@@ -151,53 +148,7 @@ fun CookBookCommunityRoot(
     fun navigateAfterSuccessfulLogin() {
         val destination = postLoginDestination
         postLoginDestination = null
-
-        when (destination) {
-            PostLoginDestination.SAVED -> {
-                navCtrl_r.navigate(SavedCollectionsRoute) {
-                    popUpTo<HomeRoute> {
-                        inclusive = false
-                        saveState = false
-                    }
-                    launchSingleTop = true
-                    restoreState = false
-                }
-            }
-
-            PostLoginDestination.PUBLISH -> {
-                navCtrl_r.navigate(CreateRecipeRoute) {
-                    popUpTo<HomeRoute> {
-                        inclusive = false
-                        saveState = false
-                    }
-                    launchSingleTop = true
-                    restoreState = false
-                }
-            }
-
-            PostLoginDestination.NOTIFICATIONS -> {
-                navCtrl_r.navigate(NotificationsRoute) {
-                    popUpTo<HomeRoute> {
-                        inclusive = false
-                        saveState = false
-                    }
-                    launchSingleTop = true
-                    restoreState = false
-                }
-            }
-
-            PostLoginDestination.PROFILE,
-            null -> {
-                navCtrl_r.navigate(OwnProfileRoute) {
-                    popUpTo<HomeRoute> {
-                        inclusive = false
-                        saveState = false
-                    }
-                    launchSingleTop = true
-                    restoreState = false
-                }
-            }
-        }
+        destination.navigateAfterLogin(appNavigation)
     }
 
     fun navigateIfLoggedIn(
@@ -212,42 +163,11 @@ fun CookBookCommunityRoot(
         }
     }
 
-    val isProtectedRoute =
-        currentDest?.hasRoute<OwnProfileRoute>() == true ||
-                currentDest?.hasRoute<CreateRecipeRoute>() == true ||
-                currentDest?.hasRoute<AdaptRecipeRoute>() == true ||
-                currentDest?.hasRoute<NotificationsRoute>() == true ||
-                currentDest?.hasRoute<SavedCollectionsRoute>() == true ||
-                currentDest?.hasRoute<CollectionDetailNavRoute>() == true ||
-                currentDest?.hasRoute<TriedRecipesRoute>() == true ||
-                currentDest?.hasRoute<AddReviewRoute>() == true ||
-                currentDest?.hasRoute<AddTipRoute>() == true ||
-                currentDest?.hasRoute<SaveToCollectionDialogRoute>() == true
-
     LaunchedEffect(isUserAuthenticated, currentDest) {
-        if (!isUserAuthenticated && isProtectedRoute) {
+        if (!isUserAuthenticated && currentDest.isProtectedRoute()) {
             showFeedback("Sign in to continue.")
             navigateToLoginFor(
-                when {
-                    currentDest?.hasRoute<CreateRecipeRoute>() == true ||
-                            currentDest?.hasRoute<AdaptRecipeRoute>() == true -> {
-                        PostLoginDestination.PUBLISH
-                    }
-
-                    currentDest?.hasRoute<SavedCollectionsRoute>() == true ||
-                            currentDest?.hasRoute<CollectionDetailNavRoute>() == true ||
-                            currentDest?.hasRoute<SaveToCollectionDialogRoute>() == true -> {
-                        PostLoginDestination.SAVED
-                    }
-
-                    currentDest?.hasRoute<NotificationsRoute>() == true -> {
-                        PostLoginDestination.NOTIFICATIONS
-                    }
-
-                    else -> {
-                        PostLoginDestination.PROFILE
-                    }
-                }
+                currentDest.postLoginDestinationForProtectedRoute()
             )
         }
     }
