@@ -3,18 +3,7 @@ package it.polito.mad.cookbookcommunity.ui.app
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -306,121 +295,66 @@ fun CookBookCommunityRoot(
                 (!isCreateRecipeRoute || isBasicInfoStep) &&
                 !(isOwnProfileRoute && isProfileEditing)
 
-    Scaffold(
+    AppScaffold(
         modifier = modifier,
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
-        bottomBar = {
-            if (showBottomBar) {
-                NavigationBar {
-                    NavigationBarItem(
-                        selected = currentDest?.hasRoute<HomeRoute>() == true,
-                        onClick = {
-                            checkNavigateFromNewRecipe {
-                                postLoginDestination = null
-                                appNavigation.navigateToHome()
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                Icons.Default.Home,
-                                contentDescription = "Home"
-                            )
-                        },
-                        label = { Text("Home") }
-                    )
-
-                    NavigationBarItem(
-                        selected = currentDest?.hasRoute<RecipesListRoute>() == true,
-                        onClick = {
-                            checkNavigateFromNewRecipe {
-                                postLoginDestination = null
-                                appNavigation.navigateToExplore()
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = "Explore"
-                            )
-                        },
-                        label = { Text("Explore") }
-                    )
-
-                    NavigationBarItem(
-                        selected =
-                            currentDest?.hasRoute<CreateRecipeRoute>() == true ||
-                                    (isSignInRoute && postLoginDestination == PostLoginDestination.PUBLISH),
-                        onClick = {
-                            checkNavigateFromNewRecipe {
-                                navigateIfLoggedIn(
-                                    destinationAfterLogin = PostLoginDestination.PUBLISH,
-                                    navigateWhenLoggedIn = {
-                                        appNavigation.navigateToCreateRecipe()
-                                    }
-                                )
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = "Create Recipe"
-                            )
-                        },
-                        label = { Text("Publish") }
-                    )
-
-                    NavigationBarItem(
-                        selected = currentDest?.hasRoute<SavedCollectionsRoute>() == true ||
-                                (isSignInRoute && postLoginDestination == PostLoginDestination.SAVED),
-                        onClick = {
-                            checkNavigateFromNewRecipe {
-                                navigateIfLoggedIn(
-                                    destinationAfterLogin = PostLoginDestination.SAVED,
-                                    navigateWhenLoggedIn = {
-                                        appNavigation.navigateToSavedCollections()
-                                    }
-                                )
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                Icons.Default.Bookmark,
-                                contentDescription = "My Collections"
-                            )
-                        },
-                        label = { Text("Saved") }
-                    )
-
-                    NavigationBarItem(
-                        selected =
-                            currentDest?.hasRoute<OwnProfileRoute>() == true ||
-                                    (isSignInRoute &&
-                                            (postLoginDestination == PostLoginDestination.PROFILE ||
-                                                    postLoginDestination == null)) ||
-                                    isAuthEntryRoute,
-                        onClick = {
-                            checkNavigateFromNewRecipe {
-                                navigateIfLoggedIn(
-                                    destinationAfterLogin = PostLoginDestination.PROFILE,
-                                    navigateWhenLoggedIn = {
-                                        appNavigation.navigateToOwnProfile()
-                                    }
-                                )
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                Icons.Default.Person,
-                                contentDescription = "Profile"
-                            )
-                        },
-                        label = { Text("Profile") }
-                    )
-                }
+        snackbarHostState = snackbarHostState,
+        showBottomBar = showBottomBar,
+        isHomeSelected = currentDest?.hasRoute<HomeRoute>() == true,
+        isExploreSelected = currentDest?.hasRoute<RecipesListRoute>() == true,
+        isPublishSelected =
+            currentDest?.hasRoute<CreateRecipeRoute>() == true ||
+                    (isSignInRoute && postLoginDestination == PostLoginDestination.PUBLISH),
+        isSavedSelected =
+            currentDest?.hasRoute<SavedCollectionsRoute>() == true ||
+                    (isSignInRoute && postLoginDestination == PostLoginDestination.SAVED),
+        isProfileSelected =
+            currentDest?.hasRoute<OwnProfileRoute>() == true ||
+                    (isSignInRoute &&
+                            (postLoginDestination == PostLoginDestination.PROFILE ||
+                                    postLoginDestination == null)) ||
+                    isAuthEntryRoute,
+        onHomeClick = {
+            checkNavigateFromNewRecipe {
+                postLoginDestination = null
+                appNavigation.navigateToHome()
             }
-        }
+        },
+        onExploreClick = {
+            checkNavigateFromNewRecipe {
+                postLoginDestination = null
+                appNavigation.navigateToExplore()
+            }
+        },
+        onPublishClick = {
+            checkNavigateFromNewRecipe {
+                navigateIfLoggedIn(
+                    destinationAfterLogin = PostLoginDestination.PUBLISH,
+                    navigateWhenLoggedIn = {
+                        appNavigation.navigateToCreateRecipe()
+                    }
+                )
+            }
+        },
+        onSavedClick = {
+            checkNavigateFromNewRecipe {
+                navigateIfLoggedIn(
+                    destinationAfterLogin = PostLoginDestination.SAVED,
+                    navigateWhenLoggedIn = {
+                        appNavigation.navigateToSavedCollections()
+                    }
+                )
+            }
+        },
+        onProfileClick = {
+            checkNavigateFromNewRecipe {
+                navigateIfLoggedIn(
+                    destinationAfterLogin = PostLoginDestination.PROFILE,
+                    navigateWhenLoggedIn = {
+                        appNavigation.navigateToOwnProfile()
+                    }
+                )
+            }
+        },
     ) { innerPadding ->
         NavHost(
             navController = navCtrl_r,
