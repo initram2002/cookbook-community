@@ -34,7 +34,6 @@ import it.polito.mad.cookbookcommunity.navigation.RecipesListRoute
 import it.polito.mad.cookbookcommunity.navigation.SavedCollectionsRoute
 import it.polito.mad.cookbookcommunity.navigation.SignUpAccountRoute
 import it.polito.mad.cookbookcommunity.navigation.isProtectedRoute
-import it.polito.mad.cookbookcommunity.navigation.navigateAfterLogin
 import it.polito.mad.cookbookcommunity.navigation.postLoginDestinationForProtectedRoute
 import it.polito.mad.cookbookcommunity.session.SessionManager
 import it.polito.mad.cookbookcommunity.viewmodel.NewRecipeStep
@@ -142,13 +141,13 @@ fun CookBookCommunityRoot(
 
     fun navigateToLoginFor(destination: PostLoginDestination) {
         postLoginDestination = destination
-        appNavigation.navigateToAuthGraph()
+        appNavigation.navigateToLogin()
     }
 
     fun navigateAfterSuccessfulLogin() {
         val destination = postLoginDestination
         postLoginDestination = null
-        destination.navigateAfterLogin(appNavigation)
+        appNavigation.navigateAfterSuccessfulLogin(destination)
     }
 
     fun navigateIfLoggedIn(
@@ -271,7 +270,7 @@ fun CookBookCommunityRoot(
                 coroutineScope.launch {
                     SessionManager.signOut()
                     postLoginDestination = PostLoginDestination.PROFILE
-                    appNavigation.navigateToAuthGraph()
+                    appNavigation.navigateToLogin()
                 }
             },
             onFeedback = { message ->

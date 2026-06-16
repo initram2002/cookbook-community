@@ -37,26 +37,3 @@ fun NavDestination?.postLoginDestinationForProtectedRoute(): PostLoginDestinatio
         }
     }
 }
-
-fun PostLoginDestination?.navigateAfterLogin(
-    appNavigation: AppNavigation
-) {
-    when (this) {
-        PostLoginDestination.SAVED -> {
-            appNavigation.navigateToSavedCollections()
-        }
-
-        PostLoginDestination.PUBLISH -> {
-            appNavigation.navigateToCreateRecipe()
-        }
-
-        PostLoginDestination.NOTIFICATIONS -> {
-            appNavigation.navigateToNotifications()
-        }
-
-        PostLoginDestination.PROFILE,
-        null -> {
-            appNavigation.navigateToOwnProfile()
-        }
-    }
-}

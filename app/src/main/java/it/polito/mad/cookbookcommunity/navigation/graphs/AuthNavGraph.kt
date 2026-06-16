@@ -1,7 +1,6 @@
 package it.polito.mad.cookbookcommunity.navigation.graphs
 
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import it.polito.mad.cookbookcommunity.data.AppContainer
@@ -17,7 +16,6 @@ import it.polito.mad.cookbookcommunity.ui.authentication.AuthEntryScreen
 import it.polito.mad.cookbookcommunity.ui.authentication.SignUpAccountScreenRoute
 
 fun NavGraphBuilder.authGraph(
-    navController: NavHostController,
     appNavigation: AppNavigation,
     appContainer: AppContainer,
     navigateAfterSuccessfulLogin: () -> Unit,
@@ -71,12 +69,7 @@ fun NavGraphBuilder.authGraph(
         composable<AuthEntryPreferencesRoute> {
             AuthEntryPreferencesScreen(
                 onCreationSuccess = {
-                    navController.navigate(SignUpAccountRoute) {
-                        popUpTo<AuthGraphRoute> {
-                            inclusive = false
-                        }
-                        launchSingleTop = true
-                    }
+                    appNavigation.navigateToSignUpAfterAccountCreation()
                 },
                 onBack = {
                     appNavigation.navigateBack()

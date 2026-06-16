@@ -2,9 +2,9 @@ package it.polito.mad.cookbookcommunity.navigation
 
 import androidx.navigation.NavController
 
-class AppNavigation(private val navCtrl_r: NavController) {
+class AppNavigation(private val navController: NavController) {
     fun navigateToHome() {
-        navCtrl_r.navigate(HomeRoute) {
+        navController.navigate(HomeRoute) {
             popUpTo<HomeRoute> {
                 inclusive = false
                 saveState = false
@@ -15,7 +15,7 @@ class AppNavigation(private val navCtrl_r: NavController) {
     }
 
     fun navigateToOwnProfile() {
-        navCtrl_r.navigate(OwnProfileRoute) {
+        navController.navigate(OwnProfileRoute) {
             popUpTo<HomeRoute> {
                 saveState = false
                 inclusive = false
@@ -26,17 +26,17 @@ class AppNavigation(private val navCtrl_r: NavController) {
     }
 
     fun navigateToOwnProfileFromContent() {
-        navCtrl_r.navigate(OwnProfileRoute)
+        navController.navigate(OwnProfileRoute)
     }
 
     fun navigateToOtherProfile(userId: String) {
-        navCtrl_r.navigate(OtherProfileRoute(userId)) {
+        navController.navigate(OtherProfileRoute(userId)) {
             launchSingleTop = true
         }
     }
 
     fun navigateToExplore() {
-        navCtrl_r.navigate(RecipesListRoute) {
+        navController.navigate(RecipesListRoute) {
             popUpTo<HomeRoute> {
                 saveState = false
                 inclusive = false
@@ -47,13 +47,13 @@ class AppNavigation(private val navCtrl_r: NavController) {
     }
 
     fun navigateToRecipeDetail(recipeId: String, fromList: Boolean) {
-        navCtrl_r.navigate(RecipeDetailRoute(recipeId, fromList)) {
+        navController.navigate(RecipeDetailRoute(recipeId, fromList)) {
             launchSingleTop = true
         }
     }
 
     fun navigateToPublishedRecipeFromCreate(recipeId: String) {
-        navCtrl_r.navigate(RecipeDetailRoute(recipeId, false)) {
+        navController.navigate(RecipeDetailRoute(recipeId, false)) {
             popUpTo<CreateRecipeRoute> {
                 inclusive = true
             }
@@ -62,7 +62,7 @@ class AppNavigation(private val navCtrl_r: NavController) {
     }
 
     fun navigateToPublishedRecipeFromAdapt(recipeId: String) {
-        navCtrl_r.navigate(RecipeDetailRoute(recipeId, false)) {
+        navController.navigate(RecipeDetailRoute(recipeId, false)) {
             popUpTo<AdaptRecipeRoute> {
                 inclusive = true
             }
@@ -71,13 +71,13 @@ class AppNavigation(private val navCtrl_r: NavController) {
     }
 
     fun navigateToRecipeListOwned(ownerId: String, isOwner: Boolean, ownerName: String) {
-        navCtrl_r.navigate(RecipeListOwnedRoute(ownerId, isOwner, ownerName)) {
+        navController.navigate(RecipeListOwnedRoute(ownerId, isOwner, ownerName)) {
             launchSingleTop = true
         }
     }
 
     fun navigateToCreateRecipe() {
-        navCtrl_r.navigate(CreateRecipeRoute) {
+        navController.navigate(CreateRecipeRoute) {
             popUpTo<HomeRoute> {
                 saveState = false
                 inclusive = false
@@ -88,25 +88,25 @@ class AppNavigation(private val navCtrl_r: NavController) {
     }
 
     fun navigateToAdaptRecipe(sourceRecipeId: String) {
-        navCtrl_r.navigate(AdaptRecipeRoute(sourceRecipeId)) {
+        navController.navigate(AdaptRecipeRoute(sourceRecipeId)) {
             launchSingleTop = true
         }
     }
 
     fun navigateToNotifications() {
-        navCtrl_r.navigate(NotificationsRoute) {
+        navController.navigate(NotificationsRoute) {
             launchSingleTop = true
         }
     }
 
     fun navigateToTriedRecipes(userId: String) {
-        navCtrl_r.navigate(TriedRecipesRoute(userId)) {
+        navController.navigate(TriedRecipesRoute(userId)) {
             launchSingleTop = true
         }
     }
 
     fun navigateToSavedCollections() {
-        navCtrl_r.navigate(SavedCollectionsRoute) {
+        navController.navigate(SavedCollectionsRoute) {
             popUpTo<HomeRoute> {
                 inclusive = false
                 saveState = false
@@ -117,41 +117,75 @@ class AppNavigation(private val navCtrl_r: NavController) {
     }
 
     fun navigateToAuthGraph() {
-        navCtrl_r.navigate(AuthGraphRoute) {
+        navController.navigate(AuthGraphRoute) {
             launchSingleTop = true
         }
     }
 
+    fun navigateToLogin() {
+        navigateToAuthGraph()
+    }
+
+    fun navigateToSignUpAfterAccountCreation() {
+        navController.navigate(SignUpAccountRoute) {
+            popUpTo<AuthGraphRoute> {
+                inclusive = false
+            }
+            launchSingleTop = true
+        }
+    }
+
+    fun navigateAfterSuccessfulLogin(destination: PostLoginDestination?) {
+        when (destination) {
+            PostLoginDestination.SAVED -> {
+                navigateToSavedCollections()
+            }
+
+            PostLoginDestination.PUBLISH -> {
+                navigateToCreateRecipe()
+            }
+
+            PostLoginDestination.NOTIFICATIONS -> {
+                navigateToNotifications()
+            }
+
+            PostLoginDestination.PROFILE,
+            null -> {
+                navigateToOwnProfile()
+            }
+        }
+    }
+
     fun navigateToSignUp() {
-        navCtrl_r.navigate(SignUpAccountRoute) {
+        navController.navigate(SignUpAccountRoute) {
             launchSingleTop = true
         }
     }
 
     fun navigateToAuthEntry() {
-        navCtrl_r.navigate(AuthEntryRoute) {
+        navController.navigate(AuthEntryRoute) {
             launchSingleTop = true
         }
     }
 
     fun navigateToAuthPhotoRole() {
-        navCtrl_r.navigate(AuthEntryPhotoRoleRoute) {
+        navController.navigate(AuthEntryPhotoRoleRoute) {
             launchSingleTop = true
         }
     }
 
     fun navigateToAuthPreferences() {
-        navCtrl_r.navigate(AuthEntryPreferencesRoute) {
+        navController.navigate(AuthEntryPreferencesRoute) {
             launchSingleTop = true
         }
     }
 
     fun navigateBack() {
-        navCtrl_r.popBackStack()
+        navController.popBackStack()
     }
 
     fun navigateToCollectionDetail(collectionId: String, collectionName: String) {
-        navCtrl_r.navigate(
+        navController.navigate(
             CollectionDetailNavRoute(
                 collectionId = collectionId,
                 collectionName = collectionName
@@ -162,25 +196,25 @@ class AppNavigation(private val navCtrl_r: NavController) {
     }
 
     fun navigateToSaveToCollection(recipeId: String) {
-        navCtrl_r.navigate(SaveToCollectionDialogRoute(recipeId)) {
+        navController.navigate(SaveToCollectionDialogRoute(recipeId)) {
             launchSingleTop = true
         }
     }
 
     fun navigateToAddReview(recipeId: String, reviewId: String? = null) {
-        navCtrl_r.navigate(AddReviewRoute(recipeId, reviewId)) {
+        navController.navigate(AddReviewRoute(recipeId, reviewId)) {
             launchSingleTop = true
         }
     }
 
     fun navigateToAddTip(recipeId: String) {
-        navCtrl_r.navigate(AddTipRoute(recipeId)) {
+        navController.navigate(AddTipRoute(recipeId)) {
             launchSingleTop = true
         }
     }
 
     fun navigateToRecipeReviews(recipeId: String) {
-        navCtrl_r.navigate(RecipeReviewsNavRoute(recipeId)) {
+        navController.navigate(RecipeReviewsNavRoute(recipeId)) {
             launchSingleTop = true
         }
     }

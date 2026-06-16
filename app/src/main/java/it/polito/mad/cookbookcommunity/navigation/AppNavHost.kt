@@ -56,7 +56,6 @@ fun AppNavHost(
         )
 
         authGraph(
-            navController = navController,
             appNavigation = appNavigation,
             appContainer = appContainer,
             navigateAfterSuccessfulLogin = navigateAfterSuccessfulLogin,
