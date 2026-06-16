@@ -17,10 +17,12 @@ internal fun NavGraphBuilder.homeGraph(
 ) {
     val recipeRepository = appContainer.recipeRepository
     val notificationRepository = appContainer.notificationRepository
+    val userProfileRepository = appContainer.userProfileRepository
 
     composable<HomeRoute> {
         HomeScreenRoute(
             repository = recipeRepository,
+            userProfileRepository = userProfileRepository,
             notificationRepository = notificationRepository,
             onRecipeClick = { id ->
                 appNavigation.navigateToRecipeDetail(id, true)

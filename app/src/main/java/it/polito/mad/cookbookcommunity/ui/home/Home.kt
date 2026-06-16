@@ -222,8 +222,14 @@ private fun HomeRecipeCard(
             overflow = TextOverflow.Ellipsis
         )
 
+        val ownerLabel = recipe.ownerDisplayName
+            .trim()
+            .removePrefix("@")
+            .takeIf { it.isNotBlank() && it != recipe.ownerId }
+            ?: recipe.ownerId
+
         Text(
-            text = "${recipe.cookTimeMinutes} min · @${recipe.ownerId}",
+            text = "${recipe.cookTimeMinutes} min · @$ownerLabel",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,

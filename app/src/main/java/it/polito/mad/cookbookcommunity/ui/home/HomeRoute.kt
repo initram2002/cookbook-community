@@ -9,6 +9,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import it.polito.mad.cookbookcommunity.data.notification.NotificationRepository
 import it.polito.mad.cookbookcommunity.model.notification.AppNotification
 import it.polito.mad.cookbookcommunity.data.recipe.RecipeRepository
+import it.polito.mad.cookbookcommunity.data.repository.UserProfileRepository
+import it.polito.mad.cookbookcommunity.data.user.UserRepository
 import it.polito.mad.cookbookcommunity.session.SessionManager
 import it.polito.mad.cookbookcommunity.viewmodel.HomeViewModel
 import kotlinx.coroutines.flow.catch
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.flowOf
 @Composable
 fun HomeScreenRoute(
     repository: RecipeRepository,
+    userProfileRepository: UserRepository,
     notificationRepository: NotificationRepository,
     onRecipeClick: (String) -> Unit,
     onSeeAllClick: () -> Unit,
@@ -26,7 +29,10 @@ fun HomeScreenRoute(
     val viewModel: HomeViewModel = viewModel(
         factory = viewModelFactory {
             initializer {
-                HomeViewModel(repository)
+                HomeViewModel(
+                    repository = repository,
+                    userProfileRepository = userProfileRepository
+                )
             }
         }
     )

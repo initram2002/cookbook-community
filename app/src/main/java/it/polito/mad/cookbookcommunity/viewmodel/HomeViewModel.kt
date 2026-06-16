@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.SharingStarted
 import androidx.lifecycle.viewModelScope
+import it.polito.mad.cookbookcommunity.data.user.UserRepository
 
 data class HomeUiState(
     val isLoading: Boolean = true,
@@ -17,7 +18,8 @@ data class HomeUiState(
 )
 
 class HomeViewModel(
-    repository: RecipeRepository
+    repository: RecipeRepository,
+    private val userProfileRepository: UserRepository
 ): ViewModel() {
 
     val uiState = repository.getAllRecipeProposals()
@@ -25,6 +27,8 @@ class HomeViewModel(
             emit(emptyList())
         }
         .map { allRecipes ->
+            val recipesWithOwnerNames = allRecipes.withResolvedOwnerNames()
+
             HomeUiState(
                 isLoading = false,
                 forYouRecipes = allRecipes.take(4),
@@ -38,4 +42,8 @@ class HomeViewModel(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = HomeUiState()
         )
+}
+
+private suspend fun List<RecipeProposal>.withResolvedOwnerNames(): List<RecipeProposal> {
+    return this
 }
