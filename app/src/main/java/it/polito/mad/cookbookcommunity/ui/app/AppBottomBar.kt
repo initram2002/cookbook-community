@@ -2,6 +2,7 @@ package it.polito.mad.cookbookcommunity.ui.app
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -59,6 +60,18 @@ fun AppBottomBar(
                 )
             },
             label = { Text("Publish") }
+        )
+
+        NavigationBarItem(
+            selected = isSavedSelected,
+            onClick = onSavedClick,
+            icon = {
+                Icon(
+                    Icons.Default.Bookmark,
+                    contentDescription = "My Collections"
+                )
+            },
+            label = { Text("Saved") }
         )
 
         NavigationBarItem(

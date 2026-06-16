@@ -11,6 +11,7 @@ fun NavDestination?.isProtectedRoute(): Boolean {
             this?.hasRoute<SavedCollectionsRoute>() == true ||
             this?.hasRoute<CollectionDetailNavRoute>() == true ||
             this?.hasRoute<TriedRecipesRoute>() == true ||
+            this?.hasRoute<AddReviewRoute>() == true ||
             this?.hasRoute<AddTipRoute>() == true ||
             this?.hasRoute<SaveToCollectionDialogRoute>() == true
 }

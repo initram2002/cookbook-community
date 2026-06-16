@@ -21,7 +21,7 @@ import it.polito.mad.cookbookcommunity.ui.profile.SaveToCollectionRoute
 import it.polito.mad.cookbookcommunity.ui.profile.SavedRoute
 import it.polito.mad.cookbookcommunity.ui.profile.TriedRecipesScreenRoute
 
-fun NavGraphBuilder.profileGraph(
+internal fun NavGraphBuilder.profileGraph(
     appNavigation: AppNavigation,
     appContainer: AppContainer,
     onProfileEditingChanged: (Boolean) -> Unit,

@@ -15,7 +15,7 @@ import it.polito.mad.cookbookcommunity.ui.authentication.AuthEntryPreferencesScr
 import it.polito.mad.cookbookcommunity.ui.authentication.AuthEntryScreen
 import it.polito.mad.cookbookcommunity.ui.authentication.SignUpAccountScreenRoute
 
-fun NavGraphBuilder.authGraph(
+internal fun NavGraphBuilder.authGraph(
     appNavigation: AppNavigation,
     appContainer: AppContainer,
     navigateAfterSuccessfulLogin: () -> Unit,
@@ -24,7 +24,7 @@ fun NavGraphBuilder.authGraph(
     val authRepository = appContainer.authRepository
     val userProfileRepository = appContainer.userProfileRepository
 
-    navigation<AuthGraphRoute> (
+    navigation<AuthGraphRoute>(
         startDestination = SignUpAccountRoute
     ) {
         composable<SignUpAccountRoute> {

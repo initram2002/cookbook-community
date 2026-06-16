@@ -24,10 +24,10 @@ import it.polito.mad.cookbookcommunity.ui.review.AddReviewScreenRoute
 import it.polito.mad.cookbookcommunity.ui.review.AddTipScreenRoute
 import it.polito.mad.cookbookcommunity.viewmodel.NewRecipeStep
 
-fun NavGraphBuilder.recipeGraph(
+internal fun NavGraphBuilder.recipeGraph(
     appNavigation: AppNavigation,
     appContainer: AppContainer,
-    navigateIfLoggedIn:(PostLoginDestination, () -> Unit) -> Unit,
+    navigateIfLoggedIn: (PostLoginDestination, () -> Unit) -> Unit,
     onNewRecipeStepChanged: (NewRecipeStep) -> Unit,
     onNewRecipeFormDataChanged: (Boolean) -> Unit,
     onRegisterNewRecipeReset: (() -> Unit) -> Unit,

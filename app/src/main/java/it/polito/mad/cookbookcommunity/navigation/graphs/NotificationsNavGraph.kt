@@ -9,7 +9,7 @@ import it.polito.mad.cookbookcommunity.navigation.AppNavigation
 import it.polito.mad.cookbookcommunity.navigation.NotificationsRoute
 import it.polito.mad.cookbookcommunity.ui.notification.NotificationsRoute as NotificationsScreenRoute
 
-fun NavGraphBuilder.notificationsGraph(
+internal fun NavGraphBuilder.notificationsGraph(
     appNavigation: AppNavigation,
     appContainer: AppContainer,
     onFeedback: (String) -> Unit,

@@ -9,7 +9,7 @@ import it.polito.mad.cookbookcommunity.navigation.PostLoginDestination
 import it.polito.mad.cookbookcommunity.ui.home.HomeScreenRoute
 
 
-fun NavGraphBuilder.homeGraph(
+internal fun NavGraphBuilder.homeGraph(
     appNavigation: AppNavigation,
     appContainer: AppContainer,
     navigateIfLoggedIn: (PostLoginDestination, () -> Unit) -> Unit,

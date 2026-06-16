@@ -46,12 +46,12 @@ fun CookBookCommunityRoot(
 ) {
     val authRepository = appContainer.authRepository
 
-    val navCtrl_r = rememberNavController()
-    val appNavigation = remember(navCtrl_r) {
-        AppNavigation(navCtrl_r)
+    val navController = rememberNavController()
+    val appNavigation = remember(navController) {
+        AppNavigation(navController)
     }
 
-    val currentBackStack by navCtrl_r.currentBackStackEntryAsState()
+    val currentBackStack by navController.currentBackStackEntryAsState()
     val currentDest = currentBackStack?.destination
 
     val currentAuthUser by authRepository.currentUser.collectAsStateWithLifecycle()
@@ -238,7 +238,7 @@ fun CookBookCommunityRoot(
         },
     ) { innerPadding ->
         AppNavHost(
-            navController = navCtrl_r,
+            navController = navController,
             appNavigation = appNavigation,
             appContainer = appContainer,
             modifier = Modifier
