@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -45,4 +46,10 @@ suspend fun requestGoogleIdToken(context: Context): Result<String> = runCatching
     } else {
         throw throwable
     }
+}
+
+fun Throwable.isGoogleSignInUserCancellation(): Boolean {
+    return this is GetCredentialCancellationException ||
+            message?.contains("Cancelled by user", ignoreCase = true) == true ||
+            message?.contains("Canceled by user", ignoreCase = true) == true
 }

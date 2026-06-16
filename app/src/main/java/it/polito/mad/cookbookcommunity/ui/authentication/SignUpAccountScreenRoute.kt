@@ -55,14 +55,18 @@ fun SignUpAccountScreenRoute(
         onCreateAccount = onCreateAccount,
         onGoogleSignInClick = {
             coroutineScope.launch {
+                viewModel.clearError()
+
                 requestGoogleIdToken(context)
                     .onSuccess { idToken ->
                         viewModel.signInWithGoogleIdToken(idToken)
                     }
                     .onFailure { throwable ->
-                        viewModel.onGoogleCredentialError(
-                            throwable.message ?: "Unable to retrieve Google credentials."
-                        )
+                        if (!throwable.isGoogleSignInUserCancellation()) {
+                            viewModel.onGoogleCredentialError(
+                                throwable.message ?: "Unable to retrieve Google credentials."
+                            )
+                        }
                     }
             }
         }
