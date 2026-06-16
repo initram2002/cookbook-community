@@ -13,6 +13,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -78,9 +81,38 @@ fun RecipeProposalRoute(
         .getTipsByRecipe(recipeId)
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
-    val authorNicknames: Map<String, String> = emptyMap()
-
     val authenticatedUserId = SessionManager.authenticatedUserIdOrNull()
+    val authenticatedUser = SessionManager.currentUser.value
+
+    val authorIds = remember(communityReviews, communityTips) {
+        (communityReviews.map { review -> review.authorId } +
+                communityTips.map { tip -> tip.authorId })
+            .filter { authorId -> authorId.isNotBlank() }
+            .distinct()
+    }
+
+    var authorNicknames by remember {
+        mutableStateOf<Map<String, String>>(emptyMap())
+    }
+
+    LaunchedEffect(authorIds, authenticatedUserId) {
+        authorNicknames = authorIds.associateWith { authorId ->
+            val profile = userProfileRepository.getUserById(authorId)
+
+            profile?.nickname?.trim()?.takeIf { it.isNotBlank() }
+                ?: profile?.fullname?.trim()?.takeIf { it.isNotBlank() }
+                ?: if (authorId == authenticatedUserId) {
+                    authenticatedUser?.displayName?.trim()?.takeIf { it.isNotBlank() }
+                        ?: authenticatedUser?.email
+                            ?.substringBefore("@")
+                            ?.trim()
+                            ?.takeIf { it.isNotBlank() }
+                } else {
+                    null
+                }
+                ?: "User $authorId"
+        }
+    }
 
     val currentUserReview = authenticatedUserId?.let { currentUserId ->
         communityReviews.firstOrNull { review ->
@@ -250,6 +282,7 @@ fun RecipeProposalRoute(
                     .map { tip ->
                         tip.toTipPreviewUiState(
                             authorLabel = authorNicknames[tip.authorId]
+                                ?.takeIf { it.isNotBlank() }
                                 ?: "User ${tip.authorId}"
                         )
                     },
