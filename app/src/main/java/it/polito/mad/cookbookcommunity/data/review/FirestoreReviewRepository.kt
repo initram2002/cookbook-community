@@ -71,8 +71,13 @@ class FirestoreReviewRepository(
             .set(reviewWithTimestamp.toFirestoreMap())
             .await()
 
-        updateRecipeValues(review.recipeId)
-        createReviewReceivedNotification(reviewWithTimestamp)
+        runCatching {
+            updateRecipeValues(review.recipeId)
+        }
+
+        runCatching {
+            createReviewReceivedNotification(reviewWithTimestamp)
+        }
     }
 
     override suspend fun updateReview(review: Review) {
@@ -83,7 +88,9 @@ class FirestoreReviewRepository(
             .set(updated.toFirestoreMap())
             .await()
 
-        updateRecipeValues(updated.recipeId)
+        runCatching {
+            updateRecipeValues(updated.recipeId)
+        }
     }
 
     override suspend fun deleteReview(reviewId: String) {
@@ -96,7 +103,9 @@ class FirestoreReviewRepository(
             .await()
 
         if(!recipeId.isNullOrBlank()) {
-            updateRecipeValues(recipeId)
+            runCatching {
+                updateRecipeValues(recipeId)
+            }
         }
     }
 

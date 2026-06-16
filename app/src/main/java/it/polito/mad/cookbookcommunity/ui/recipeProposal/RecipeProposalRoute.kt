@@ -238,8 +238,10 @@ fun RecipeProposalRoute(
                     .take(3)
                     .map { review ->
                         review.toPreviewUiState(
-                            authorLabel = authorNicknames[review.authorId]
-                                ?: "User ${review.authorId}",
+                            authorLabel = review.authorDisplayName.ifBlank {
+                                authorNicknames[review.authorId]
+                                    ?: "User ${review.authorId}"
+                            },
                             isCurrentUserReview = authenticatedUserId != null &&
                                     review.authorId == authenticatedUserId
                         )

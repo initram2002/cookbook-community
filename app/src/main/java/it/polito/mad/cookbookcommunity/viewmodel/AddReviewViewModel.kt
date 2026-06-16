@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import it.polito.mad.cookbookcommunity.data.recipe.RecipeRepository
 import it.polito.mad.cookbookcommunity.data.review.ReviewRepository
 import it.polito.mad.cookbookcommunity.data.repository.TriedRecipeRepository
+import it.polito.mad.cookbookcommunity.data.user.UserRepository
 import it.polito.mad.cookbookcommunity.model.review.Review
 import it.polito.mad.cookbookcommunity.model.review.TriedRecipeLog
 import it.polito.mad.cookbookcommunity.session.SessionManager
@@ -70,7 +71,8 @@ class AddReviewViewModel(
     private val initialReviewId: String?,
     private val recipeRepository: RecipeRepository,
     private val reviewRepository: ReviewRepository,
-    private val triedRecipeRepository: TriedRecipeRepository
+    private val triedRecipeRepository: TriedRecipeRepository,
+    private val userProfileRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddReviewUiState(recipeId = recipeId))
@@ -175,8 +177,18 @@ class AddReviewViewModel(
                 val existingReviewId = current.editingReviewId
 
                 val currentUser = SessionManager.currentUser.value
-                val authorDisplayName = currentUser?.displayName ?: "Anonymous"
-                val authorPhotoUrl = currentUser?.photoUrl ?: ""
+                val currentUserProfile = userProfileRepository.getUserById(currentUserId)
+
+                val authorDisplayName =
+                    currentUserProfile?.nickname?.trim()?.takeIf { it.isNotBlank() }
+                        ?: currentUserProfile?.fullname?.trim()?.takeIf { it.isNotBlank() }
+                        ?: currentUser?.displayName?.trim()?.takeIf { it.isNotBlank() }
+                        ?: currentUser?.email?.substringBefore("@")?.trim()?.takeIf { it.isNotBlank() }
+                        ?: "User"
+
+                val authorPhotoUrl =
+                    currentUserProfile?.profileImage?.value?.takeIf { it.isNotBlank() }
+                        ?: currentUser?.photoUrl.orEmpty()
 
                 val review = Review(
                     id = existingReviewId ?: UUID.randomUUID().toString(),
@@ -197,15 +209,17 @@ class AddReviewViewModel(
                 if (existingReviewId == null) {
                     reviewRepository.addReview(review)
 
-                    triedRecipeRepository.addTriedRecipe(
-                        TriedRecipeLog(
-                            recipeId = recipeId,
-                            userId = currentUserId,
-                            reviewId = review.id,
-                            cookedAt = now,
-                            notes = review.text
+                    runCatching {
+                        triedRecipeRepository.addTriedRecipe(
+                            TriedRecipeLog(
+                                recipeId = recipeId,
+                                userId = currentUserId,
+                                reviewId = review.id,
+                                cookedAt = now,
+                                notes = review.text
+                            )
                         )
-                    )
+                    }
                 } else {
                     reviewRepository.updateReview(review)
                 }

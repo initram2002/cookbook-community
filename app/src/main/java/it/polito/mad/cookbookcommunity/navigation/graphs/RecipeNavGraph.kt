@@ -177,6 +177,7 @@ internal fun NavGraphBuilder.recipeGraph(
             recipeRepository = recipeRepository,
             reviewRepository = reviewRepository,
             triedRecipeRepository = triedRecipeRepository,
+            userProfileRepository = userProfileRepository,
             onBackClick = {
                 appNavigation.navigateBack()
             },

@@ -47,20 +47,23 @@ import coil.compose.AsyncImage
 import it.polito.mad.cookbookcommunity.data.recipe.RecipeRepository
 import it.polito.mad.cookbookcommunity.data.review.ReviewRepository
 import it.polito.mad.cookbookcommunity.data.repository.TriedRecipeRepository
+import it.polito.mad.cookbookcommunity.data.repository.UserProfileRepository
+import it.polito.mad.cookbookcommunity.data.user.UserRepository
 import it.polito.mad.cookbookcommunity.viewmodel.AddReviewUiState
 import it.polito.mad.cookbookcommunity.viewmodel.AddReviewViewModel
 
 @Composable
 fun AddReviewScreenRoute(
     recipeId: String,
+    modifier: Modifier = Modifier,
     initialReviewId: String? = null,
     recipeRepository: RecipeRepository,
     reviewRepository: ReviewRepository,
     triedRecipeRepository: TriedRecipeRepository,
+    userProfileRepository: UserRepository,
     onBackClick: () -> Unit,
     onPublished: () -> Unit,
     onFeedback: (String) -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
     val viewModel: AddReviewViewModel = viewModel(
         key = "add_review_${recipeId}_${initialReviewId ?: "new"}",
@@ -71,7 +74,8 @@ fun AddReviewScreenRoute(
                     initialReviewId = initialReviewId,
                     recipeRepository = recipeRepository,
                     reviewRepository = reviewRepository,
-                    triedRecipeRepository = triedRecipeRepository
+                    triedRecipeRepository = triedRecipeRepository,
+                    userProfileRepository = userProfileRepository
                 )
             }
         }
