@@ -106,7 +106,7 @@ class TriedRecipesViewModel(
                         cookedAt = log.cookedAt,
                         rating = linkedReview?.rating,
                         reviewTitle = linkedReview?.title,
-                        reviewText = linkedReview?.text ?: log.notes
+                        reviewText = linkedReview?.text ?: log.effectivePersonalNote()
                     )
                 }
             }.collect { items ->

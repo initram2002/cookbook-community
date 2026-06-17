@@ -6,6 +6,7 @@ import it.polito.mad.cookbookcommunity.data.recipe.RecipeRepository
 import it.polito.mad.cookbookcommunity.data.review.ReviewRepository
 import it.polito.mad.cookbookcommunity.data.repository.TriedRecipeRepository
 import it.polito.mad.cookbookcommunity.data.user.UserRepository
+import it.polito.mad.cookbookcommunity.model.review.CookingResult
 import it.polito.mad.cookbookcommunity.model.review.Review
 import it.polito.mad.cookbookcommunity.model.review.TriedRecipeLog
 import it.polito.mad.cookbookcommunity.session.SessionManager
@@ -216,6 +217,12 @@ class AddReviewViewModel(
                                 userId = currentUserId,
                                 reviewId = review.id,
                                 cookedAt = now,
+                                result = CookingResult.GOOD,
+                                personalNote = review.text,
+                                recipeTitle = current.recipeTitle,
+                                recipeImageUri = current.recipeImageUri,
+                                createdAt = now,
+                                updatedAt = now,
                                 notes = review.text
                             )
                         )
