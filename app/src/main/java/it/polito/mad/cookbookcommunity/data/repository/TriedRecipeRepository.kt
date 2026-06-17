@@ -4,11 +4,37 @@ import it.polito.mad.cookbookcommunity.model.review.TriedRecipeLog
 import kotlinx.coroutines.flow.Flow
 
 interface TriedRecipeRepository {
-    fun getTriedRecipesByUser(userId: String): Flow<List<TriedRecipeLog>>
+    fun getDiaryEntriesByUser(userId: String): Flow<List<TriedRecipeLog>>
 
-    suspend fun addTriedRecipe(log: TriedRecipeLog)
+    fun getDiaryEntryById(entryId: String): Flow<TriedRecipeLog?>
 
-    suspend fun deleteTriedRecipe(logId: String)
+    fun getDiaryEntryForRecipe(
+        userId: String,
+        recipeId: String
+    ): Flow<TriedRecipeLog?>
 
-    suspend fun deleteTriedRecipesByRecipe(recipeId: String)
+    suspend fun addDiaryEntry(entry: TriedRecipeLog)
+
+    suspend fun updateDiaryEntry(entry: TriedRecipeLog)
+
+    suspend fun upsertDiaryEntry(entry: TriedRecipeLog)
+
+    suspend fun deleteDiaryEntry(entryId: String)
+
+    suspend fun deleteDiaryEntriesByRecipe(recipeId: String)
+
+    fun getTriedRecipesByUser(userId: String): Flow<List<TriedRecipeLog>> =
+        getDiaryEntriesByUser(userId)
+
+    suspend fun addTriedRecipe(log: TriedRecipeLog) {
+        addDiaryEntry(log)
+    }
+
+    suspend fun deleteTriedRecipe(logId: String) {
+        deleteDiaryEntry(logId)
+    }
+
+    suspend fun deleteTriedRecipesByRecipe(recipeId: String) {
+        deleteDiaryEntriesByRecipe(recipeId)
+    }
 }

@@ -82,12 +82,21 @@ object FirestoreCollections {
     }
 
     object TriedRecipe {
-        const val ID        = "id"
-        const val RECIPE_ID = "recipeId"
-        const val USER_ID   = "userId"
-        const val REVIEW_ID = "reviewId"
-        const val COOKED_AT = "cookedAt"
-        const val NOTES     = "notes"
+        const val ID                = "id"
+        const val RECIPE_ID         = "recipeId"
+        const val USER_ID           = "userId"
+        const val REVIEW_ID         = "reviewId"
+        const val COOKED_AT         = "cookedAt"
+        const val RESULT            = "result"
+        const val MODIFICATIONS     = "modifications"
+        const val PERSONAL_NOTE     = "personalNote"
+        const val FINAL_PHOTO_URI   = "finalPhotoUri"
+        const val WOULD_COOK_AGAIN  = "wouldCookAgain"
+        const val RECIPE_TITLE      = "recipeTitle"
+        const val RECIPE_IMAGE_URI  = "recipeImageUri"
+        const val CREATED_AT        = "createdAt"
+        const val UPDATED_AT        = "updatedAt"
+        const val NOTES             = "notes"
     }
 
 
