@@ -1,5 +1,6 @@
 package it.polito.mad.cookbookcommunity.navigation.graphs
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
@@ -9,6 +10,7 @@ import androidx.navigation.toRoute
 import it.polito.mad.cookbookcommunity.data.AppContainer
 import it.polito.mad.cookbookcommunity.navigation.AppNavigation
 import it.polito.mad.cookbookcommunity.navigation.CollectionDetailNavRoute
+import it.polito.mad.cookbookcommunity.navigation.DiaryRoute
 import it.polito.mad.cookbookcommunity.navigation.OtherProfileRoute
 import it.polito.mad.cookbookcommunity.navigation.OwnProfileRoute
 import it.polito.mad.cookbookcommunity.navigation.SaveToCollectionDialogRoute
@@ -59,7 +61,7 @@ internal fun NavGraphBuilder.profileGraph(
                 )
             },
             onTriedRecipesClick = { ownerId ->
-                appNavigation.navigateToTriedRecipes(ownerId)
+                appNavigation.navigateToDiary(ownerId)
             },
             onSavedClick = {
                 appNavigation.navigateToSavedCollections()
@@ -91,9 +93,46 @@ internal fun NavGraphBuilder.profileGraph(
 
     composable<TriedRecipesRoute> { backStackEntry ->
         val args = backStackEntry.toRoute<TriedRecipesRoute>()
+        val currentAuthUser by authRepository.currentUser.collectAsStateWithLifecycle()
+        val currentUserId = currentAuthUser?.uid ?: return@composable
+
+        if (args.userId != currentUserId) {
+            LaunchedEffect(args.userId, currentUserId) {
+                onFeedback("You can only open your own diary.")
+                appNavigation.navigateBack()
+            }
+            return@composable
+        }
 
         TriedRecipesScreenRoute(
-            userId = args.userId,
+            userId = currentUserId,
+            triedRecipeRepository = triedRecipeRepository,
+            recipeRepository = recipeRepository,
+            reviewRepository = reviewRepository,
+            onBackClick = {
+                appNavigation.navigateBack()
+            },
+            onRecipeClick = { recipeId ->
+                appNavigation.navigateToRecipeDetail(recipeId, false)
+            }
+        )
+    }
+
+    composable<DiaryRoute> { backstackEntry ->
+        val args = backstackEntry.toRoute<DiaryRoute>()
+        val currentAuthUser by authRepository.currentUser.collectAsStateWithLifecycle()
+        val currentUserId = currentAuthUser?.uid ?: return@composable
+
+        if (args.userId != currentUserId) {
+            LaunchedEffect(args.userId, currentUserId) {
+                onFeedback("You can only open your own diary.")
+                appNavigation.navigateBack()
+            }
+            return@composable
+        }
+
+        TriedRecipesScreenRoute(
+            userId = currentUserId,
             triedRecipeRepository = triedRecipeRepository,
             recipeRepository = recipeRepository,
             reviewRepository = reviewRepository,

@@ -3,7 +3,7 @@ package it.polito.mad.cookbookcommunity.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import it.polito.mad.cookbookcommunity.data.repository.RecipeProposalRepository
+import it.polito.mad.cookbookcommunity.data.recipe.RecipeRepository
 import it.polito.mad.cookbookcommunity.data.repository.TriedRecipeRepository
 import it.polito.mad.cookbookcommunity.model.review.CookingResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,7 +49,7 @@ sealed interface DiaryUiEvent {
 class DiaryViewModel(
     private val userId: String,
     private val triedRecipeRepository: TriedRecipeRepository,
-    private val recipeRepository: RecipeProposalRepository
+    private val recipeRepository: RecipeRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DiaryUiState())
@@ -197,7 +197,7 @@ class DiaryViewModel(
 class DiaryViewModelFactory(
     private val userId: String,
     private val triedRecipeRepository: TriedRecipeRepository,
-    private val recipeRepository: RecipeProposalRepository
+    private val recipeRepository: RecipeRepository
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")

@@ -100,7 +100,22 @@ class AppNavigation(private val navController: NavController) {
     }
 
     fun navigateToTriedRecipes(userId: String) {
-        navController.navigate(TriedRecipesRoute(userId)) {
+        navigateToDiary(userId)
+    }
+
+    fun navigateToDiary(userId: String) {
+        navController.navigate(DiaryRoute(userId)) {
+            launchSingleTop = true
+        }
+    }
+
+    fun navigateToAddDiaryEntry(recipeId: String, entryId: String? = null) {
+        navController.navigate(
+            AddDiaryEntryRoute(
+                recipeId = recipeId,
+                entryId = entryId
+            )
+        ) {
             launchSingleTop = true
         }
     }

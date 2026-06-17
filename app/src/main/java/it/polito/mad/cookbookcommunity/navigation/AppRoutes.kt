@@ -61,6 +61,17 @@ data class TriedRecipesRoute(
 )
 
 @Serializable
+data class DiaryRoute(
+    val userId: String
+)
+
+@Serializable
+data class AddDiaryEntryRoute(
+    val recipeId: String,
+    val entryId: String? = null
+)
+
+@Serializable
 object SavedCollectionsRoute
 
 @Serializable
