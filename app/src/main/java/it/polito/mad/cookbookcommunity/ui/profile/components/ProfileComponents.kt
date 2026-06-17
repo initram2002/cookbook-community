@@ -366,7 +366,7 @@ private fun MyAndTriedRecipes(
         )
 
         CollectionCard(
-            title = "Tried recipes",
+            title = "Diary",
             modifier = Modifier.weight(1f),
             onClick = onTriedRecipesClick
         )
@@ -391,7 +391,7 @@ private fun OverviewCollections(
         )
 
         CollectionCard(
-            title = "Tried",
+            title = "Diary",
             modifier = Modifier.weight(1f),
             height = 100.dp,
             onClick = onTriedRecipesClick
