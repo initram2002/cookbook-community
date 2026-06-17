@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -26,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,54 +38,50 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import it.polito.mad.cookbookcommunity.data.recipe.RecipeRepository
-import it.polito.mad.cookbookcommunity.data.review.ReviewRepository
 import it.polito.mad.cookbookcommunity.data.repository.TriedRecipeRepository
+import it.polito.mad.cookbookcommunity.model.review.CookingResult
 import it.polito.mad.cookbookcommunity.ui.components.recipeproposal.RecipeImageContent
-import it.polito.mad.cookbookcommunity.viewmodel.TriedRecipeListItem
-import it.polito.mad.cookbookcommunity.viewmodel.TriedRecipesUiEvent
-import it.polito.mad.cookbookcommunity.viewmodel.TriedRecipesUiState
-import it.polito.mad.cookbookcommunity.viewmodel.TriedRecipesViewModel
+import it.polito.mad.cookbookcommunity.viewmodel.DiaryListItem
+import it.polito.mad.cookbookcommunity.viewmodel.DiaryUiEvent
+import it.polito.mad.cookbookcommunity.viewmodel.DiaryUiState
+import it.polito.mad.cookbookcommunity.viewmodel.DiaryViewModel
+import it.polito.mad.cookbookcommunity.viewmodel.DiaryViewModelFactory
 
 @Composable
 fun TriedRecipesScreenRoute(
     userId: String,
     triedRecipeRepository: TriedRecipeRepository,
     recipeRepository: RecipeRepository,
-    reviewRepository: ReviewRepository,
     onBackClick: () -> Unit,
-    onRecipeClick: (String) -> Unit,
+    onDiaryEntryClick: (recipeId: String, entryId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val viewModel: TriedRecipesViewModel = viewModel(
-        key = "tried-recipes-$userId",
-        factory = viewModelFactory {
-            initializer {
-                TriedRecipesViewModel(
-                    userId = userId,
-                    triedRecipeRepository = triedRecipeRepository,
-                    recipeRepository = recipeRepository,
-                    reviewRepository = reviewRepository
-                )
-            }
-        }
+    val viewModel: DiaryViewModel = viewModel(
+        key = "diary-$userId",
+        factory = DiaryViewModelFactory(
+            userId = userId,
+            triedRecipeRepository = triedRecipeRepository,
+            recipeRepository = recipeRepository
+        )
     )
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(uiState.recipeIdToOpen) {
-        uiState.recipeIdToOpen?.let { recipeId ->
-            onRecipeClick(recipeId)
-            viewModel.onEvent(TriedRecipesUiEvent.NavigationConsumed)
-        }
+    LaunchedEffect(uiState.entryIdToOpen, uiState.entries) {
+        val entryId = uiState.entryIdToOpen ?: return@LaunchedEffect
+        val entry = uiState.entries.firstOrNull { it.entryId == entryId }
+            ?: return@LaunchedEffect
+
+        onDiaryEntryClick(entry.recipeId, entry.entryId)
+        viewModel.onEvent(DiaryUiEvent.DiaryEntryOpenConsumed)
     }
 
-    TriedRecipesScreen(
+    DiaryScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         onBackClick = onBackClick,
@@ -91,9 +90,9 @@ fun TriedRecipesScreenRoute(
 }
 
 @Composable
-private fun TriedRecipesScreen(
-    uiState: TriedRecipesUiState,
-    onEvent: (TriedRecipesUiEvent) -> Unit,
+private fun DiaryScreen(
+    uiState: DiaryUiState,
+    onEvent: (DiaryUiEvent) -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -103,7 +102,7 @@ private fun TriedRecipesScreen(
             .statusBarsPadding()
             .navigationBarsPadding(),
         topBar = {
-            TriedRecipesHeader(onBackClick = onBackClick)
+            DiaryHeader(onBackClick = onBackClick)
         }
     ) { paddingValues ->
         Box(
@@ -118,14 +117,17 @@ private fun TriedRecipesScreen(
                     )
                 }
 
-                uiState.items.isEmpty() -> {
-                    Text(
-                        text = "No tried recipes yet. Review a recipe you cooked to see it here.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(24.dp)
+                uiState.errorMessage != null && uiState.entries.isEmpty() -> {
+                    DiaryMessageState(
+                        message = uiState.errorMessage,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+
+                uiState.entries.isEmpty() -> {
+                    DiaryMessageState(
+                        message = "No diary entries yet. Add a diary note after cooking a recipe.",
+                        modifier = Modifier.align(Alignment.Center)
                     )
                 }
 
@@ -135,22 +137,22 @@ private fun TriedRecipesScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(
-                            items = uiState.items,
-                            key = { it.logId }
+                            items = uiState.entries,
+                            key = { it.entryId }
                         ) { item ->
-                            TriedRecipeCard(
+                            DiaryEntryCard(
                                 item = item,
                                 onClick = {
                                     onEvent(
-                                        TriedRecipesUiEvent.RecipeClicked(
-                                            item.recipe.id
+                                        DiaryUiEvent.DiaryEntryClicked(
+                                            item.entryId
                                         )
                                     )
                                 },
-                                onRemoveClick = {
+                                onDeleteClick = {
                                     onEvent(
-                                        TriedRecipesUiEvent.DeleteRequested(
-                                            item.logId
+                                        DiaryUiEvent.DeleteDiaryEntryRequested(
+                                            item.entryId
                                         )
                                     )
                                 }
@@ -160,13 +162,14 @@ private fun TriedRecipesScreen(
                 }
             }
 
-            if (uiState.logIdToDelete != null) {
-                RemoveTriedRecipeDialog(
+            if (uiState.entryIdToDelete != null) {
+                DeleteDiaryEntryDialog(
+                    isDeleting = uiState.isDeleting,
                     onConfirm = {
-                        onEvent(TriedRecipesUiEvent.DeleteConfirmed)
+                        onEvent(DiaryUiEvent.DeleteDiaryEntryConfirmed)
                     },
                     onDismiss = {
-                        onEvent(TriedRecipesUiEvent.DeleteDismissed)
+                        onEvent(DiaryUiEvent.DeleteDiaryEntryDismissed)
                     }
                 )
             }
@@ -175,7 +178,7 @@ private fun TriedRecipesScreen(
 }
 
 @Composable
-private fun TriedRecipesHeader(
+private fun DiaryHeader(
     onBackClick: () -> Unit
 ) {
     Row(
@@ -189,7 +192,7 @@ private fun TriedRecipesHeader(
         }
 
         Text(
-            text = "Tried recipes",
+            text = "Diary",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
@@ -197,10 +200,23 @@ private fun TriedRecipesHeader(
 }
 
 @Composable
-private fun TriedRecipeCard(
-    item: TriedRecipeListItem,
+private fun DiaryMessageState(
+    message: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = message,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier.padding(24.dp)
+    )
+}
+
+@Composable
+private fun DiaryEntryCard(
+    item: DiaryListItem,
     onClick: () -> Unit,
-    onRemoveClick: () -> Unit
+    onDeleteClick: () -> Unit
 ) {
     val relativeCookedAt = remember(item.cookedAt) {
         DateUtils.getRelativeTimeSpanString(
@@ -224,98 +240,174 @@ private fun TriedRecipeCard(
                     .aspectRatio(16f / 9f)
             ) {
                 RecipeImageContent(
-                    imageUri = item.recipe.imageUri,
-                    contentDescription = item.recipe.title,
+                    imageUri = item.imageUri,
+                    contentDescription = item.recipeTitle,
+                    placeholderText = "Diary photo",
                     modifier = Modifier.fillMaxSize()
                 )
             }
 
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                    .padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Column(
-                    modifier = Modifier.weight(1f)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Text(
-                        text = item.recipe.title.ifBlank { "Untitled recipe" },
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Text(
-                        text = "Tried $relativeCookedAt",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    item.rating?.let { rating ->
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Text(
-                            text = "Rating: $rating/5",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(top = 4.dp)
+                            text = item.recipeTitle.ifBlank { "Untitled recipe" },
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
                         )
-                    }
 
-                    item.reviewTitle?.takeIf { it.isNotBlank() }?.let { title ->
                         Text(
-                            text = title,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-
-                    item.reviewText?.takeIf { it.isNotBlank() }?.let { notes ->
-                        Text(
-                            text = notes,
+                            text = "Cooked $relativeCookedAt",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 4.dp)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    IconButton(onClick = onDeleteClick) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete diary entry",
+                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }
 
-                IconButton(onClick = onRemoveClick) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Remove from tried recipes",
-                        tint = MaterialTheme.colorScheme.error
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    DiaryChip(label = item.result.displayName())
+
+                    DiaryChip(
+                        label = if (item.wouldCookAgain) {
+                            "Would cook again"
+                        } else {
+                            "Would not cook again"
+                        }
                     )
                 }
+
+                if (item.hasFinalPhoto) {
+                    DiaryChip(label = "Final photo")
+                }
+
+                DiaryPreviewSection(
+                    title = "Personal note",
+                    text = item.personalNotePreview
+                )
+
+                DiaryPreviewSection(
+                    title = "Adaptions",
+                    text = item.modificationsPreview
+                )
             }
         }
     }
 }
 
 @Composable
-private fun RemoveTriedRecipeDialog(
+private fun DiaryPreviewSection(
+    title: String,
+    text: String
+) {
+    if (text.isBlank()) return
+
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun DiaryChip(
+    label: String
+) {
+    Surface(
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.secondaryContainer
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun DeleteDiaryEntryDialog(
+    isDeleting: Boolean,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            if (!isDeleting) {
+                onDismiss()
+            }
+        },
         title = {
-            Text("Remove tried recipe")
+            Text("Delete diary entry")
         },
         text = {
-            Text("Do you want to remove this recipe from your tried recipes history?")
+            Text("Do you want to delete this diary entry?")
         },
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            TextButton(
+                enabled = !isDeleting,
+                onClick = onConfirm
+            ) {
                 Text(
-                    text = "Remove",
+                    text = if (isDeleting) "Deleting..." else "Delete",
                     color = MaterialTheme.colorScheme.error
                 )
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                enabled = !isDeleting,
+                onClick = onDismiss
+            ) {
                 Text("Cancel")
             }
         }
     )
+}
+
+private fun CookingResult.displayName(): String {
+    return when (this) {
+        CookingResult.EXCELLENT -> "Excellent"
+        CookingResult.GOOD -> "Good"
+        CookingResult.OK -> "Ok"
+        CookingResult.FAILED -> "Failed"
+    }
 }

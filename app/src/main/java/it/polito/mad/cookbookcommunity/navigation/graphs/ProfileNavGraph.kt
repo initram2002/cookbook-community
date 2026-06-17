@@ -33,7 +33,6 @@ internal fun NavGraphBuilder.profileGraph(
     val authRepository = appContainer.authRepository
     val userProfileRepository = appContainer.userProfileRepository
     val recipeRepository = appContainer.recipeRepository
-    val reviewRepository = appContainer.reviewRepository
     val triedRecipeRepository = appContainer.triedRecipeRepository
     val favoriteRepository = appContainer.favoriteRepository
     val favoriteCollectionRepository = appContainer.favoriteCollectionRepository
@@ -108,12 +107,14 @@ internal fun NavGraphBuilder.profileGraph(
             userId = currentUserId,
             triedRecipeRepository = triedRecipeRepository,
             recipeRepository = recipeRepository,
-            reviewRepository = reviewRepository,
             onBackClick = {
                 appNavigation.navigateBack()
             },
-            onRecipeClick = { recipeId ->
-                appNavigation.navigateToRecipeDetail(recipeId, false)
+            onDiaryEntryClick = { recipeId, entryId ->
+                appNavigation.navigateToAddDiaryEntry(
+                    recipeId = recipeId,
+                    entryId = entryId
+                )
             }
         )
     }
@@ -135,12 +136,14 @@ internal fun NavGraphBuilder.profileGraph(
             userId = currentUserId,
             triedRecipeRepository = triedRecipeRepository,
             recipeRepository = recipeRepository,
-            reviewRepository = reviewRepository,
             onBackClick = {
                 appNavigation.navigateBack()
             },
-            onRecipeClick = { recipeId ->
-                appNavigation.navigateToRecipeDetail(recipeId, false)
+            onDiaryEntryClick = { recipeId, entryId ->
+                appNavigation.navigateToAddDiaryEntry(
+                    recipeId = recipeId,
+                    entryId = entryId
+                )
             }
         )
     }
