@@ -19,6 +19,15 @@ interface TriedRecipeRepository {
 
     suspend fun upsertDiaryEntry(entry: TriedRecipeLog)
 
+    suspend fun linkReviewToDiaryEntry(
+        userId: String,
+        recipeId: String,
+        reviewId: String,
+        recipeTitle: String,
+        recipeImageUri: String,
+        cookedAt: Long
+    )
+
     suspend fun deleteDiaryEntry(entryId: String)
 
     suspend fun deleteDiaryEntriesByRecipe(recipeId: String)

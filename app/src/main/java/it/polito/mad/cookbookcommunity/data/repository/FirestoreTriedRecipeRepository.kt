@@ -92,6 +92,88 @@ class FirestoreTriedRecipeRepository : TriedRecipeRepository {
             .await()
     }
 
+    override suspend fun linkReviewToDiaryEntry(
+        userId: String,
+        recipeId: String,
+        reviewId: String,
+        recipeTitle: String,
+        recipeImageUri: String,
+        cookedAt: Long
+    ) {
+        require(userId.isNotBlank()) {
+            "A review link must belong to a user."
+        }
+
+        require(recipeId.isNotBlank()) {
+            "A review link must belong to a recipe."
+        }
+
+        require(reviewId.isNotBlank()) {
+            "A review link must reference a review."
+        }
+
+        val existingDocument = collection
+            .whereEqualTo(TriedRecipeFirestore.USER_ID, userId)
+            .whereEqualTo(TriedRecipeFirestore.RECIPE_ID, recipeId)
+            .limit(1)
+            .get()
+            .await()
+            .documents
+            .firstOrNull()
+
+        val now = System.currentTimeMillis()
+
+        if (existingDocument == null) {
+            val newDocument = collection.document()
+
+            val newEntry = TriedRecipeLog(
+                id = newDocument.id,
+                recipeId = recipeId,
+                userId = userId,
+                reviewId = reviewId,
+                cookedAt = cookedAt,
+                recipeTitle = recipeTitle,
+                recipeImageUri = recipeImageUri,
+                createdAt = now,
+                updatedAt = now
+            ).normalizedForWrite(updatedAt = now)
+
+            newDocument
+                .set(newEntry.toFirestoreMap())
+                .await()
+        } else {
+            val existingEntry = existingDocument.toTriedRecipeLog()
+                ?: TriedRecipeLog(
+                    id = existingDocument.id,
+                    recipeId = recipeId,
+                    userId = userId,
+                    cookedAt = cookedAt,
+                    recipeTitle = recipeTitle,
+                    recipeImageUri = recipeImageUri,
+                    createdAt = now,
+                    updatedAt = now
+                )
+
+            val linkedEntry = existingEntry.copy(
+                reviewId = reviewId,
+                recipeTitle = existingEntry.recipeTitle.ifBlank {
+                    recipeTitle
+                },
+                recipeImageUri = existingEntry.recipeImageUri.ifBlank {
+                    recipeImageUri
+                },
+                updatedAt = now
+            ).normalizedForWrite(updatedAt = now)
+
+            existingDocument.reference
+                .set(
+                    linkedEntry.toFirestoreMap(),
+                    SetOptions.merge()
+                )
+                .await()
+        }
+    }
+
     override suspend fun deleteDiaryEntry(entryId: String) {
         collection
             .document(entryId)

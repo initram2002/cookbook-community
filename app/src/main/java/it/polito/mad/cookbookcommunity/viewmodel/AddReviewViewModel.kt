@@ -209,26 +209,19 @@ class AddReviewViewModel(
 
                 if (existingReviewId == null) {
                     reviewRepository.addReview(review)
-
-                    runCatching {
-                        triedRecipeRepository.addTriedRecipe(
-                            TriedRecipeLog(
-                                recipeId = recipeId,
-                                userId = currentUserId,
-                                reviewId = review.id,
-                                cookedAt = now,
-                                result = CookingResult.GOOD,
-                                personalNote = review.text,
-                                recipeTitle = current.recipeTitle,
-                                recipeImageUri = current.recipeImageUri,
-                                createdAt = now,
-                                updatedAt = now,
-                                notes = review.text
-                            )
-                        )
-                    }
                 } else {
                     reviewRepository.updateReview(review)
+                }
+
+                runCatching {
+                    triedRecipeRepository.linkReviewToDiaryEntry(
+                        userId = currentUserId,
+                        recipeId = recipeId,
+                        reviewId = review.id,
+                        recipeTitle = current.recipeTitle,
+                        recipeImageUri = current.recipeImageUri,
+                        cookedAt = review.createdAt
+                    )
                 }
 
                 _uiState.update {
