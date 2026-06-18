@@ -211,7 +211,16 @@ private fun BasicInfoStep(
                 "file:///android_asset/greek_salad.jpg",
                 "file:///android_asset/brownies.jpg",
                 "file:///android_asset/hummus.jpg",
-                "file:///android_asset/avocado_toast.jpg"
+                "file:///android_asset/avocado_toast.jpg",
+                "file:///android_asset/cookies.jpg",
+                "file:///android_asset/crostata.jpg",
+                "file:///android_asset/fish.jpg",
+                "file:///android_asset/frittura.jpg",
+                "file:///android_asset/pizza.jpg",
+                "file:///android_asset/salame.jpg",
+                "file:///android_asset/sourp.jpg",
+                "file:///android_asset/tacos.jpg",
+                "file:///android_asset/tiramisu.jpg"
             )
 
             val currentIndex = assetImages.indexOf(form.imageUri)
@@ -246,6 +255,21 @@ private fun BasicInfoStep(
                 minLines = 3,
                 maxLines = 5
             )
+        }
+
+        if (form.originalRecipeId != null) {
+            item {
+                AdaptationEditorSection(
+                    originalRecipeTitle = form.originalRecipeTitle,
+                    originalRecipeImageUri = form.originalRecipeImageUri,
+                    originalAuthorDisplayName = form.originalAuthorDisplayName,
+                    adaptationNote = form.adaptationNote,
+                    error = errors.adaptationNote,
+                    onAdaptationNoteChanged = {
+                        onEvent(NewRecipeEvent.AdaptationNoteChanged(it))
+                    }
+                )
+            }
         }
 
         item {
@@ -346,6 +370,118 @@ private fun BasicInfoStep(
                 selected = form.dietaryRestrictions,
                 onToggle = { onEvent(NewRecipeEvent.DietaryRestrictionToggled(it)) }
             )
+        }
+    }
+}
+
+@Composable
+private fun AdaptationEditorSection(
+    originalRecipeTitle: String,
+    originalRecipeImageUri: String,
+    originalAuthorDisplayName: String,
+    adaptationNote: String,
+    error: String?,
+    onAdaptationNoteChanged: (String) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = "Adapting a recipe",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        OriginalRecipeSummaryCard(
+            originalRecipeTitle = originalRecipeTitle,
+            originalRecipeImageUri = originalRecipeImageUri,
+            originalAuthorDisplayName = originalAuthorDisplayName
+        )
+
+        OutlinedTextField(
+            value = adaptationNote,
+            onValueChange = onAdaptationNoteChanged,
+            label = { Text("What did you change?") },
+            placeholder = {
+                Text("Example: I replaced diary ingredients with plant-based alternatives.")
+            },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 3,
+            maxLines = 5,
+            isError = error != null,
+            supportingText = {
+                Text(
+                    text = error ?: "${adaptationNote.trim().length}/220 characters",
+                    color = if (error != null) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            }
+        )
+    }
+}
+
+@Composable
+private fun OriginalRecipeSummaryCard(
+    originalRecipeTitle: String,
+    originalRecipeImageUri: String,
+    originalAuthorDisplayName: String
+) {
+    val displayTitle = originalRecipeTitle.ifBlank { "Original recipe" }
+    val displayAuthor = originalAuthorDisplayName.ifBlank { "Original author" }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Card(
+                modifier = Modifier
+                    .width(96.dp)
+                    .height(64.dp),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                RecipeImageContent(
+                    imageUri = originalRecipeImageUri,
+                    contentDescription = "Original recipe cover image",
+                    modifier = Modifier.fillMaxSize(),
+                    placeholderText = "Original recipe"
+                )
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = "Original recipe",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                Text(
+                    text = displayTitle,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                Text(
+                    text = "by $displayAuthor",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
         }
     }
 }
@@ -679,6 +815,12 @@ private fun PreviewStep(
             }
         }
 
+        if (form.originalRecipeId != null) {
+            item {
+                AdaptationPreviewSection(form = form)
+            }
+        }
+
         item {
             SectionHeader(
                 title = "Ingredients list",
@@ -722,6 +864,44 @@ private fun PreviewStep(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AdaptationPreviewSection(
+    form: NewRecipeFormData
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = "Adapted from",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        OriginalRecipeSummaryCard(
+            originalRecipeTitle = form.originalRecipeTitle,
+            originalRecipeImageUri = form.originalRecipeImageUri,
+            originalAuthorDisplayName = form.originalAuthorDisplayName
+        )
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "Your changes",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Text(
+                text = form.adaptationNote.ifBlank {
+                    "No adaptation note provided."
+                },
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
@@ -966,6 +1146,35 @@ private fun NewRecipeProposalScreenPreview() {
             ),
             onEvent = {},
             onBackClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun AdaptRecipeProposalScreenPreview() {
+    CookBookCommunityTheme {
+        NewRecipeProposalScreen(
+            uiState = NewRecipeUiState(
+                currentStep = NewRecipeStep.BASIC_INFO,
+                form = NewRecipeFormData(
+                    title = "Whole wheat tomato pasta",
+                    description = "A lighter version of a classic tomato pasta",
+                    imageUri = "file:///android_asset/pasta.jpg",
+                    servings = 2,
+                    cookTimeMinutes = 20,
+                    originalRecipeId = "original-pasta-id",
+                    originalRecipeTitle = "Classic tomato pasta",
+                    originalRecipeImageUri = "file:///android_asset/pasta.jpg",
+                    originalAuthorId = "user-luca",
+                    originalAuthorDisplayName = "Luca Bianchi",
+                    adaptationNote = "I used whole wheat pasta and added fresh basil."
+                )
+            ),
+            onEvent = {},
+            onBackClick = {},
+            showBackOnFirstStep = true,
+            title = "Adapt recipe"
         )
     }
 }
