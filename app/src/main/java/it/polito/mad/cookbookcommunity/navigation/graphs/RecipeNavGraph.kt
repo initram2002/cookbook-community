@@ -64,6 +64,7 @@ internal fun NavGraphBuilder.recipeGraph(
             userProfileRepository = userProfileRepository,
             reviewRepository = reviewRepository,
             tipRepository = tipRepository,
+            triedRecipeRepository = triedRecipeRepository,
             deleteRecipeProposalUseCase = deleteRecipeProposalUseCase,
             onBackClick = {
                 appNavigation.navigateBack()
@@ -93,6 +94,13 @@ internal fun NavGraphBuilder.recipeGraph(
             onAddTipClick = { recipeId ->
                 navigateIfLoggedIn(PostLoginDestination.PROFILE) {
                     appNavigation.navigateToAddTip(recipeId)
+                }
+            },
+            onAddDiaryClick = { recipeId, entryId ->
+                navigateIfLoggedIn(PostLoginDestination.PROFILE) {
+                    appNavigation.navigateToAddDiaryEntry(
+                        recipeId = recipeId,
+                        entryId = entryId)
                 }
             },
             onSeeAllReviewsClick = { recipeId ->

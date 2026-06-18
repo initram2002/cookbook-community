@@ -25,6 +25,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import it.polito.mad.cookbookcommunity.data.recipe.RecipeRepository
 import it.polito.mad.cookbookcommunity.data.review.ReviewRepository
 import it.polito.mad.cookbookcommunity.data.repository.TipRepository
+import it.polito.mad.cookbookcommunity.data.repository.TriedRecipeRepository
 import it.polito.mad.cookbookcommunity.data.user.UserRepository
 import it.polito.mad.cookbookcommunity.domain.usecase.DeleteRecipeProposalUseCase
 import it.polito.mad.cookbookcommunity.model.review.Review
@@ -34,6 +35,7 @@ import it.polito.mad.cookbookcommunity.ui.dialogs.SuccessDialog
 import it.polito.mad.cookbookcommunity.viewmodel.RecipeEditorViewModel
 import it.polito.mad.cookbookcommunity.viewmodel.RecipeProposalUiEvent
 import it.polito.mad.cookbookcommunity.viewmodel.toDisplayState
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun RecipeProposalRoute(
@@ -42,6 +44,7 @@ fun RecipeProposalRoute(
     userProfileRepository: UserRepository,
     reviewRepository: ReviewRepository,
     tipRepository: TipRepository,
+    triedRecipeRepository: TriedRecipeRepository,
     deleteRecipeProposalUseCase: DeleteRecipeProposalUseCase,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -52,6 +55,7 @@ fun RecipeProposalRoute(
     onSaveToCollectionClick: (recipeId: String) -> Unit = {},
     onAddReviewClick: (recipeId: String, reviewId: String?) -> Unit = { _, _ -> },
     onAddTipClick: (recipeId: String) -> Unit = {},
+    onAddDiaryClick: (recipeId: String, entryId: String?) -> Unit = { _, _ -> },
     onSeeAllReviewsClick: (recipeId: String) -> Unit = {}
 ) {
     val viewModel: RecipeEditorViewModel = viewModel(
@@ -83,6 +87,19 @@ fun RecipeProposalRoute(
 
     val authenticatedUserId = SessionManager.authenticatedUserIdOrNull()
     val authenticatedUser = SessionManager.currentUser.value
+
+    val diaryEntryFlow = remember(authenticatedUserId, recipeId) {
+        authenticatedUserId?.let { userId ->
+            triedRecipeRepository.getDiaryEntryForRecipe(
+                userId = userId,
+                recipeId = recipeId
+            )
+        } ?: flowOf(null)
+    }
+
+    val existingDiaryEntry by diaryEntryFlow.collectAsStateWithLifecycle(
+        initialValue = null
+    )
 
     val authorIds = remember(communityReviews, communityTips) {
         (communityReviews.map { review -> review.authorId } +
@@ -258,6 +275,17 @@ fun RecipeProposalRoute(
                 },
                 onDuplicateClick = {
                     onDuplicateClick(recipe.id)
+                },
+                diaryActionLabel = if (existingDiaryEntry == null) {
+                    "Add to diary"
+                } else {
+                    "Edit diary note"
+                },
+                onAddDiaryClick = {
+                    onAddDiaryClick(
+                        recipe.id,
+                        existingDiaryEntry?.id
+                    )
                 },
                 reviewPreviews = communityReviews
                     .sortedWith(

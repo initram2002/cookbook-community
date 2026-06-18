@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
@@ -48,9 +49,9 @@ import androidx.compose.ui.unit.dp
 import it.polito.mad.cookbookcommunity.model.recipe.IngredientItem
 import it.polito.mad.cookbookcommunity.model.recipe.IngredientUnit
 import it.polito.mad.cookbookcommunity.model.recipe.InstructionStep
+import it.polito.mad.cookbookcommunity.ui.components.recipeproposal.RecipeImageContent
 import it.polito.mad.cookbookcommunity.viewmodel.RecipeProposalDisplayState
 import it.polito.mad.cookbookcommunity.viewmodel.RecipeProposalUiEvent
-import it.polito.mad.cookbookcommunity.ui.components.recipeproposal.RecipeImageContent
 
 @Composable
 fun RecipeProposalScreen(
@@ -65,7 +66,9 @@ fun RecipeProposalScreen(
     reviewActionLabel: String = "Add review",
     onAddReviewClick: () -> Unit = {},
     onAddTipClick: () -> Unit = {},
-    onDuplicateClick: () -> Unit = {}
+    onDuplicateClick: () -> Unit = {},
+    diaryActionLabel: String = "Add to diary",
+    onAddDiaryClick: () -> Unit = {}
 ) {
     if (uiState.showDeleteConfirm) {
         AlertDialog(
@@ -127,6 +130,13 @@ fun RecipeProposalScreen(
                 onDeleteClick = { onEvent(RecipeProposalUiEvent.DeleteRequested) },
                 onSaveClick = { onEvent(RecipeProposalUiEvent.SaveRequested) },
                 onDuplicateClick = onDuplicateClick
+            )
+        }
+
+        item {
+            DiaryActionButton(
+                label = diaryActionLabel,
+                onClick = onAddDiaryClick
             )
         }
 
@@ -392,6 +402,27 @@ private fun InfoCard(
                 textAlign = TextAlign.Center
             )
         }
+    }
+}
+
+@Composable
+private fun DiaryActionButton(
+    label: String,
+    onClick: () -> Unit
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.MenuBook,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp)
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(label)
     }
 }
 
