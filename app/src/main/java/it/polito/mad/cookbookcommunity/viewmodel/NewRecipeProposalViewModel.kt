@@ -39,7 +39,14 @@ data class NewRecipeFormData(
     val dietaryRestrictions: List<DietaryRestriction> = emptyList(),
     val ingredients: List<IngredientItem> = emptyList(),
     val steps: List<InstructionStep> = emptyList(),
-    val originalRecipeId: String? = null
+
+    val originalRecipeId: String? = null,
+    val originalRecipeTitle: String = "",
+    val originalRecipeImageUri: String = "",
+    val originalAuthorId: String = "",
+    val originalAuthorDisplayName: String = "",
+    val originalAuthorPhotoUrl: String = "",
+    val adaptationNote: String = ""
 )
 
 data class NewRecipeErrors(
@@ -47,6 +54,7 @@ data class NewRecipeErrors(
     val servings: String? = null,
     val cookTimeMinutes: String? = null,
     val calories: String? = null,
+    val adaptationNote: String? = null,
     val ingredients: String? = null,
     val steps: String? = null
 ) {
@@ -55,6 +63,7 @@ data class NewRecipeErrors(
                 servings != null ||
                 cookTimeMinutes != null ||
                 calories != null ||
+                adaptationNote != null ||
                 ingredients != null ||
                 steps != null
 }
@@ -83,6 +92,7 @@ sealed interface NewRecipeEvent {
 
     data class TitleChanged(val value: String) : NewRecipeEvent
     data class DescriptionChanged(val value: String) : NewRecipeEvent
+    data class AdaptationNoteChanged(val value: String) : NewRecipeEvent
     data class ImageUriChanged(val value: String) : NewRecipeEvent
     data class ServingsChanged(val value: Int) : NewRecipeEvent
     data class PriceRangeChanged(val value: PriceRange) : NewRecipeEvent
@@ -122,6 +132,7 @@ class NewRecipeProposalViewModel(
             is NewRecipeEvent.DismissSuccessMessage -> dismissSuccessMessageInternal()
             is NewRecipeEvent.TitleChanged -> updateTitleInternal(event.value)
             is NewRecipeEvent.DescriptionChanged -> updateDescriptionInternal(event.value)
+            is NewRecipeEvent.AdaptationNoteChanged -> updateAdaptationNoteInternal(event.value)
             is NewRecipeEvent.ImageUriChanged -> updateImageUriInternal(event.value)
             is NewRecipeEvent.ServingsChanged -> updateServingsInternal(event.value)
             is NewRecipeEvent.PriceRangeChanged -> updatePriceRangeInternal(event.value)
@@ -174,7 +185,10 @@ class NewRecipeProposalViewModel(
         _uiState.value = NewRecipeUiState()
     }
 
-    private fun validateStep(step: NewRecipeStep, form: NewRecipeFormData): NewRecipeErrors {
+    private fun validateStep(
+        step: NewRecipeStep,
+        form: NewRecipeFormData
+    ): NewRecipeErrors {
         return when (step) {
             NewRecipeStep.BASIC_INFO -> {
                 val titleTrimmed = form.title.trim()
@@ -205,11 +219,31 @@ class NewRecipeProposalViewModel(
                     else -> null
                 }
 
+                val adaptationNoteError = if (form.originalRecipeId != null) {
+                    val trimmedNote = form.adaptationNote.trim()
+
+                    when {
+                        trimmedNote.isEmpty() ->
+                            "Explain briefly what you changed or why you adapted this recipe."
+
+                        trimmedNote.length < 10 ->
+                            "Adaptation note must be at least 10 characters."
+
+                        trimmedNote.length > 220 ->
+                            "Adaptation note must be at most 220 characters."
+
+                        else -> null
+                    }
+                } else {
+                    null
+                }
+
                 NewRecipeErrors(
                     title = titleError,
                     servings = servingsError,
                     cookTimeMinutes = cookTimeError,
-                    calories = caloriesError
+                    calories = caloriesError,
+                    adaptationNote = adaptationNoteError
                 )
             }
 
@@ -255,6 +289,15 @@ class NewRecipeProposalViewModel(
     private fun updateDescriptionInternal(value: String) {
         _uiState.update { state ->
             state.copy(form = state.form.copy(description = value))
+        }
+    }
+
+    private fun updateAdaptationNoteInternal(value: String) {
+        _uiState.update { state ->
+            state.copy(
+                form = state.form.copy(adaptationNote = value),
+                errors = state.errors.copy(adaptationNote = null)
+            )
         }
     }
 
@@ -415,6 +458,7 @@ class NewRecipeProposalViewModel(
             servings = basicErrors.servings,
             cookTimeMinutes = basicErrors.cookTimeMinutes,
             calories = basicErrors.calories,
+            adaptationNote = basicErrors.adaptationNote,
             ingredients = ingredientErrors.ingredients,
             steps = stepErrors.steps
         )
@@ -521,9 +565,19 @@ class NewRecipeProposalViewModel(
                 .firstOrNull()
                 ?: return@launch
 
+            val rootRecipeId = sourceRecipe.originalRecipeId ?: sourceRecipe.id
+
+            val rootRecipe = if (rootRecipeId == sourceRecipe.id) {
+                sourceRecipe
+            } else {
+                repository
+                    .getRecipeProposalById(rootRecipeId)
+                    .firstOrNull()
+            }
+
             _uiState.update { state ->
                 state.copy(
-                    form = sourceRecipe.toAdaptedRecipeFormData(),
+                    form = sourceRecipe.toAdaptedRecipeFormData(rootRecipe),
                     currentStep = NewRecipeStep.BASIC_INFO,
                     errors = NewRecipeErrors(),
                     successMessage = null,
@@ -534,24 +588,64 @@ class NewRecipeProposalViewModel(
         }
     }
 
-    private fun RecipeProposal.toAdaptedRecipeFormData(): NewRecipeFormData {
+    private fun RecipeProposal.toAdaptedRecipeFormData(
+        rootRecipe: RecipeProposal?
+    ): NewRecipeFormData {
+        val rootRecipeId = rootRecipe?.id ?: originalRecipeId ?: id
+
+        val rootRecipeTitle = rootRecipe?.title
+            ?.takeIf { it.isNotBlank() }
+            ?: originalRecipeTitle
+
+        val rootRecipeImageUri = rootRecipe?.imageUri
+            ?.takeIf { it.isNotBlank() }
+            ?: originalRecipeImageUri
+
+        val rootAuthorId = rootRecipe?.ownerId
+            ?.takeIf { it.isNotBlank() }
+            ?: originalAuthorId
+
+        val rootAuthorDisplayName = rootRecipe?.ownerDisplayName
+            ?.takeIf { it.isNotBlank() }
+            ?: originalAuthorDisplayName
+
+        val rootAuthorPhotoUrl = rootRecipe?.ownerPhotoUrl
+            ?.takeIf { it.isNotBlank() }
+            ?: originalAuthorPhotoUrl
+
         return NewRecipeFormData(
             title = title,
             description = description,
             imageUri = imageUri,
             servings = servings,
-            priceRange = runCatching { PriceRange.valueOf(priceRange) }.getOrDefault(PriceRange.MEDIUM),
-            difficulty = runCatching { DifficultyLevel.valueOf(difficulty) }.getOrDefault(DifficultyLevel.MEDIUM),
+            priceRange = runCatching {
+                PriceRange.valueOf(priceRange)
+            }.getOrDefault(PriceRange.MEDIUM),
+            difficulty = runCatching {
+                DifficultyLevel.valueOf(difficulty)
+            }.getOrDefault(DifficultyLevel.MEDIUM),
             cookTimeMinutes = cookTimeMinutes,
             calories = calories,
-            recipeType = runCatching { RecipeType.valueOf(recipeType) }.getOrDefault(RecipeType.MAIN_COURSE),
-            cuisineType = cuisineType?.let { runCatching { CuisineType.valueOf(it) }.getOrNull() },
+            recipeType = runCatching {
+                RecipeType.valueOf(recipeType)
+            }.getOrDefault(RecipeType.MAIN_COURSE),
+            cuisineType = cuisineType?.let {
+                runCatching { CuisineType.valueOf(it) }.getOrNull()
+            },
             dietaryRestrictions = dietaryRestrictions.mapNotNull {
                 runCatching { DietaryRestriction.valueOf(it) }.getOrNull()
             },
             ingredients = ingredients,
             steps = steps,
-            originalRecipeId = originalRecipeId ?: id
+
+            originalRecipeId = rootRecipeId,
+            originalRecipeTitle = rootRecipeTitle,
+            originalRecipeImageUri = rootRecipeImageUri,
+            originalAuthorId = rootAuthorId,
+            originalAuthorDisplayName = rootAuthorDisplayName,
+            originalAuthorPhotoUrl = rootAuthorPhotoUrl,
+
+            adaptationNote = ""
         )
     }
 }
