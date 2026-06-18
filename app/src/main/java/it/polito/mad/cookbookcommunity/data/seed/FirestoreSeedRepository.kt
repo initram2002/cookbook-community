@@ -5,25 +5,49 @@ import com.google.firebase.firestore.firestore
 import it.polito.mad.cookbookcommunity.data.firestore.FirestoreCollections
 import it.polito.mad.cookbookcommunity.model.collection.Favorite
 import it.polito.mad.cookbookcommunity.model.collection.FavoriteCollection
+import it.polito.mad.cookbookcommunity.model.review.CookingResult
 import kotlinx.coroutines.tasks.await
 
 class FirestoreSeedRepository {
 
     private val db = Firebase.firestore
 
-    suspend fun seedIfEmpty(loggedUserId: String, loggedUserDisplayName: String) {
-        val recipesSnap = db.collection(FirestoreCollections.RECIPES).limit(1).get().await()
-        if (!recipesSnap.isEmpty) return
+    suspend fun seedIfEmpty(
+        loggedUserId: String,
+        loggedUserDisplayName: String
+    ) {
+        val recipesSnap = db.collection(FirestoreCollections.RECIPES)
+            .limit(1)
+            .get()
+            .await()
 
-        val otherUserId      = "2"
-        val otherDisplayName = "Luca Ferretti"
+        if (recipesSnap.isEmpty) {
+            val otherUserId = "2"
+            val otherDisplayName = "Luca Ferretti"
 
-        seedUsers(loggedUserId, loggedUserDisplayName)
-        seedRecipes(loggedUserId, loggedUserDisplayName, otherUserId, otherDisplayName)
-        seedReviews(loggedUserId, loggedUserDisplayName, otherUserId, otherDisplayName)
-        seedFavorites(loggedUserId)
-        seedFavoriteCollections(loggedUserId)
-        seedNotifications(loggedUserId, otherUserId, otherDisplayName)
+            seedUsers(loggedUserId, loggedUserDisplayName)
+            seedRecipes(
+                loggedUserId = loggedUserId,
+                loggedDisplayName = loggedUserDisplayName,
+                otherUserId = otherUserId,
+                otherDisplayName = otherDisplayName
+            )
+            seedReviews(
+                loggedUserId = loggedUserId,
+                loggedDisplayName = loggedUserDisplayName,
+                otherUserId = otherUserId,
+                otherDisplayName = otherDisplayName
+            )
+            seedFavorites(loggedUserId)
+            seedFavoriteCollections(loggedUserId)
+            seedNotifications(
+                loggedUserId = loggedUserId,
+                otherUserId = otherUserId,
+                otherDisplayName = otherDisplayName
+            )
+        }
+
+        seedDiaryEntriesIfMissing(loggedUserId)
     }
 
     private suspend fun seedUsers(loggedUserId: String, loggedUserDisplayName: String) {
@@ -397,6 +421,107 @@ class FirestoreSeedRepository {
         }
     }
 
+    private suspend fun seedDiaryEntriesIfMissing(
+        loggedUserId: String
+    ) {
+        val now = System.currentTimeMillis()
+        val oneDayMillis = 24L * 60L * 60L * 1000L
+
+        val entries = listOf(
+            diaryEntryMap(
+                id = "seed_diary_${loggedUserId}_recipe_3",
+                recipeId = "3",
+                userId = loggedUserId,
+                reviewId = "4",
+                cookedAt = now - 9L * oneDayMillis,
+                result = CookingResult.EXCELLENT,
+                modifications = "Added extra oregano and a squeeze of lemon before serving.",
+                personalNote = "Fresh, quick and ideal for a warm evening. The feta was the best part.",
+                finalPhotoUri = "file:///android_asset/greek_salad.jpg",
+                wouldCookAgain = true,
+                recipeTitle = "Greek Salad",
+                recipeImageUri = "file:///android_asset/greek_salad.jpg"
+            ),
+
+            diaryEntryMap(
+                id = "seed_diary_${loggedUserId}_recipe_4",
+                recipeId = "4",
+                userId = loggedUserId,
+                reviewId = null,
+                cookedAt = now - 6L * oneDayMillis,
+                result = CookingResult.GOOD,
+                modifications = "User wholegrain toast and added chili flakes.",
+                personalNote = "A reliable breakfast when I need something fast before class.",
+                finalPhotoUri = "file:///android_asset/avocado_toast.jpg",
+                wouldCookAgain = true,
+                recipeTitle = "Avocado Toast",
+                recipeImageUri = "file:///android_asset/avocado_toast.jpg"
+            ),
+
+            diaryEntryMap(
+                id = "seed_diary_${loggedUserId}_recipe_6",
+                recipeId = "6",
+                userId = loggedUserId,
+                reviewId = null,
+                cookedAt = now - 3L * oneDayMillis,
+                result = CookingResult.FAILED,
+                modifications = """
+                    I used a baking tray that was not hot enough and rolled the dough too thick.
+                    Next time I need to preheat the tray for longer, stretch the dough more carefully
+                    and reduce the amount of mozzarella so the centre stays crisp.
+                """.trimIndent(),
+                personalNote = "The flavour was fine, but the base remained soft and the topping released too much water.",
+                finalPhotoUri = "",
+                wouldCookAgain = false,
+                recipeTitle = "Margherita Pizza",
+                recipeImageUri = "file:///android_asset/pizza.jpg"
+            ),
+
+            diaryEntryMap(
+                id = "seed_diary_${loggedUserId}_recipe_8",
+                recipeId = "8",
+                userId = loggedUserId,
+                reviewId = null,
+                cookedAt = now - oneDayMillis,
+                result = CookingResult.OK,
+                modifications = "Reduced the sugar slightly and baked one minute less.",
+                personalNote = "Nice texture, although I would use darker chocolate next time.",
+                finalPhotoUri = "file:///android_asset/cookies.jpg",
+                wouldCookAgain = true,
+                recipeTitle = "Chocolate Chip Cookies",
+                recipeImageUri = "file:///android_asset/cookies.jpg"
+            )
+        )
+
+        for (entry in entries) {
+            val recipeId = entry[FirestoreCollections.TriedRecipe.RECIPE_ID] as String
+
+            val existingEntry = db.collection(FirestoreCollections.TRIED_RECIPES)
+                .whereEqualTo(
+                    FirestoreCollections.TriedRecipe.USER_ID,
+                    loggedUserId
+                )
+                .whereEqualTo(
+                    FirestoreCollections.TriedRecipe.RECIPE_ID,
+                    recipeId
+                )
+                .limit(1)
+                .get()
+                .await()
+
+            if (!existingEntry.isEmpty) {
+                continue
+            }
+
+            val entryId = entry[FirestoreCollections.TriedRecipe.ID] as String
+
+            db.collection(FirestoreCollections.TRIED_RECIPES)
+                .document(entryId)
+                .set(entry)
+                .await()
+        }
+    }
+
     private suspend fun seedFavorites(loggedUserId: String) {
         val savedName = FavoriteCollection.SAVED_RECIPES_NAME
 
@@ -598,6 +723,37 @@ class FirestoreSeedRepository {
         "photoUri"          to null,
         "createdAt"         to System.currentTimeMillis(),
         "updatedAt"         to System.currentTimeMillis()
+    )
+
+    private fun diaryEntryMap(
+        id: String,
+        recipeId: String,
+        userId: String,
+        reviewId: String?,
+        cookedAt: Long,
+        result: CookingResult,
+        modifications: String,
+        personalNote: String,
+        finalPhotoUri: String,
+        wouldCookAgain: Boolean,
+        recipeTitle: String,
+        recipeImageUri: String
+    ): Map<String, Any?> = mapOf(
+        FirestoreCollections.TriedRecipe.ID to id,
+        FirestoreCollections.TriedRecipe.RECIPE_ID to recipeId,
+        FirestoreCollections.TriedRecipe.USER_ID to userId,
+        FirestoreCollections.TriedRecipe.REVIEW_ID to reviewId,
+        FirestoreCollections.TriedRecipe.COOKED_AT to cookedAt,
+        FirestoreCollections.TriedRecipe.RESULT to result,
+        FirestoreCollections.TriedRecipe.MODIFICATIONS to modifications,
+        FirestoreCollections.TriedRecipe.PERSONAL_NOTE to personalNote,
+        FirestoreCollections.TriedRecipe.FINAL_PHOTO_URI to finalPhotoUri,
+        FirestoreCollections.TriedRecipe.WOULD_COOK_AGAIN to wouldCookAgain,
+        FirestoreCollections.TriedRecipe.RECIPE_TITLE to recipeTitle,
+        FirestoreCollections.TriedRecipe.RECIPE_IMAGE_URI to recipeImageUri,
+        FirestoreCollections.TriedRecipe.CREATED_AT to cookedAt,
+        FirestoreCollections.TriedRecipe.UPDATED_AT to cookedAt,
+        FirestoreCollections.TriedRecipe.NOTES to null
     )
 
     private fun favToMap(f: Favorite): Map<String, Any?> = mapOf(
