@@ -1,6 +1,5 @@
 package it.polito.mad.cookbookcommunity.navigation.graphs
 
-import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
@@ -17,6 +16,7 @@ import it.polito.mad.cookbookcommunity.navigation.RecipeListOwnedRoute
 import it.polito.mad.cookbookcommunity.navigation.RecipeReviewsNavRoute
 import it.polito.mad.cookbookcommunity.navigation.RecipesListRoute
 import it.polito.mad.cookbookcommunity.session.SessionManager
+import it.polito.mad.cookbookcommunity.ui.diary.AddDiaryEntryScreenRoute
 import it.polito.mad.cookbookcommunity.ui.recipeProposal.NewRecipeProposalRoute
 import it.polito.mad.cookbookcommunity.ui.recipeProposal.RecipeListRoute
 import it.polito.mad.cookbookcommunity.ui.recipeProposal.RecipeProposalRoute
@@ -212,10 +212,21 @@ internal fun NavGraphBuilder.recipeGraph(
     composable<AddDiaryEntryRoute> { backstackEntry ->
         val args = backstackEntry.toRoute<AddDiaryEntryRoute>()
 
-        LaunchedEffect(args.recipeId, args.entryId) {
-            onFeedback("Diary editor will be available in the next step.")
-            appNavigation.navigateBack()
-        }
+        AddDiaryEntryScreenRoute(
+            recipeId = args.recipeId,
+            entryId = args.entryId,
+            recipeRepository = recipeRepository,
+            triedRecipeRepository = triedRecipeRepository,
+            onBackClick = {
+                appNavigation.navigateBack()
+            },
+            onSaved = {
+                appNavigation.navigateBack()
+            },
+            onFeedback = { message ->
+                onFeedback(message)
+            }
+        )
     }
 
     composable<RecipeReviewsNavRoute> { backStackEntry ->
