@@ -168,7 +168,7 @@ private fun AddDiaryEntryScreen(
             )
 
             DiaryTextArea(
-                title = "Modifications",
+                title = "Adaptations",
                 value = uiState.modifications,
                 placeholder = "What did you change?",
                 onValueChange = onModificationsChange
@@ -433,7 +433,7 @@ private fun FinalPhotoSection(
             RecipeImageContent(
                 imageUri = photoUri,
                 contentDescription = "Final cooked result",
-                placeholderText = "No final photo",
+                placeholderText = "No final photo selected",
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -451,7 +451,7 @@ private fun FinalPhotoSection(
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     text = if (photoUri.isBlank()) {
-                        "Select photo"
+                        "Choose photo"
                     } else {
                         "Change photo"
                     }
@@ -535,7 +535,7 @@ private fun DiarySaveBar(
                     text = when {
                         isSaving -> "Saving..."
                         isEditing -> "Save changes"
-                        else -> "Publish"
+                        else -> "Save entry"
                     }
                 )
             }

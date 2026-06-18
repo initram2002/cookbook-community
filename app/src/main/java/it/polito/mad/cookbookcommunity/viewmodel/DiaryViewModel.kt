@@ -33,6 +33,7 @@ data class DiaryUiState(
     val isLoading: Boolean = true,
     val isDeleting: Boolean = false,
     val errorMessage: String? = null,
+    val feedbackMessage: String? = null,
     val entryIdToDelete: String? = null,
     val entryIdToOpen: String? = null
 )
@@ -44,6 +45,7 @@ sealed interface DiaryUiEvent {
     data object DeleteDiaryEntryDismissed : DiaryUiEvent
     data object DiaryEntryOpenConsumed : DiaryUiEvent
     data object ErrorShown : DiaryUiEvent
+    data object FeedbackConsumed : DiaryUiEvent
 }
 
 class DiaryViewModel(
@@ -92,6 +94,12 @@ class DiaryViewModel(
             DiaryUiEvent.ErrorShown -> {
                 _uiState.update {
                     it.copy(errorMessage = null)
+                }
+            }
+
+            DiaryUiEvent.FeedbackConsumed -> {
+                _uiState.update {
+                    it.copy(feedbackMessage = null)
                 }
             }
         }
@@ -167,7 +175,8 @@ class DiaryViewModel(
                         it.copy(
                             isDeleting = false,
                             entryIdToDelete = null,
-                            errorMessage = null
+                            errorMessage = null,
+                            feedbackMessage = "Diary entry deleted."
                         )
                     }
                 }
@@ -176,7 +185,8 @@ class DiaryViewModel(
                         it.copy(
                             isDeleting = false,
                             entryIdToDelete = null,
-                            errorMessage = throwable.message ?: "Unable to delete diary entry."
+                            feedbackMessage = throwable.message
+                                ?: "Unable to delete diary entry."
                         )
                     }
                 }

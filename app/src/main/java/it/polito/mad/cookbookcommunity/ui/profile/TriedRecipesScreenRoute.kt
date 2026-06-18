@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -59,6 +61,7 @@ fun TriedRecipesScreenRoute(
     recipeRepository: RecipeRepository,
     onBackClick: () -> Unit,
     onDiaryEntryClick: (recipeId: String, entryId: String) -> Unit,
+    onFeedback: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: DiaryViewModel = viewModel(
@@ -71,6 +74,13 @@ fun TriedRecipesScreenRoute(
     )
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.feedbackMessage) {
+        val message = uiState.feedbackMessage ?: return@LaunchedEffect
+
+        onFeedback(message)
+        viewModel.onEvent(DiaryUiEvent.FeedbackConsumed)
+    }
 
     LaunchedEffect(uiState.entryIdToOpen, uiState.entries) {
         val entryId = uiState.entryIdToOpen ?: return@LaunchedEffect
@@ -119,14 +129,17 @@ private fun DiaryScreen(
 
                 uiState.errorMessage != null && uiState.entries.isEmpty() -> {
                     DiaryMessageState(
-                        message = uiState.errorMessage,
+                        title = "Unable to load diary",
+                        message = uiState.errorMessage
+                            ?: "Please try again in a moment.",
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
 
                 uiState.entries.isEmpty() -> {
                     DiaryMessageState(
-                        message = "No diary entries yet. Add a diary note after cooking a recipe.",
+                        title = "No diary entries yet",
+                        message = "Add a note after cooking a recipe.",
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
@@ -201,15 +214,29 @@ private fun DiaryHeader(
 
 @Composable
 private fun DiaryMessageState(
+    title: String,
     message: String,
     modifier: Modifier = Modifier
 ) {
-    Text(
-        text = message,
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier.padding(24.dp)
-    )
+    Column(
+        modifier = modifier.padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 @Composable
@@ -285,8 +312,9 @@ private fun DiaryEntryCard(
                     }
                 }
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                FlowRow (
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     DiaryChip(label = item.result.displayName())
 
@@ -297,6 +325,10 @@ private fun DiaryEntryCard(
                             "Would not cook again"
                         }
                     )
+
+                    if (item.hasFinalPhoto) {
+                        DiaryChip(label = "Final photo")
+                    }
                 }
 
                 if (item.hasFinalPhoto) {
@@ -379,7 +411,9 @@ private fun DeleteDiaryEntryDialog(
             Text("Delete diary entry")
         },
         text = {
-            Text("Do you want to delete this diary entry?")
+            Text(
+                "This will permanently remove your personal note, adaptations and final photo."
+            )
         },
         confirmButton = {
             TextButton(

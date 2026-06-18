@@ -115,7 +115,8 @@ internal fun NavGraphBuilder.profileGraph(
                     recipeId = recipeId,
                     entryId = entryId
                 )
-            }
+            },
+            onFeedback = onFeedback
         )
     }
 
@@ -144,7 +145,8 @@ internal fun NavGraphBuilder.profileGraph(
                     recipeId = recipeId,
                     entryId = entryId
                 )
-            }
+            },
+            onFeedback = onFeedback
         )
     }
 
