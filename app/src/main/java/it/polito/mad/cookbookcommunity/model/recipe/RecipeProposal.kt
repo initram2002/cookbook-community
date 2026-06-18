@@ -20,7 +20,15 @@ data class RecipeProposal(
     var dietaryRestrictions: List<String> = emptyList(),
     var ingredients: List<IngredientItem> = emptyList(),
     var steps: List<InstructionStep> = emptyList(),
+
     var originalRecipeId: String? = null,
+    var originalRecipeTitle: String = "",
+    var originalRecipeImageUri: String = "",
+    var originalAuthorId: String = "",
+    var originalAuthorDisplayName: String = "",
+    var originalAuthorPhotoUrl: String = "",
+    var adaptationNote: String = "",
+
     var createdAt: Long = System.currentTimeMillis(),
     var updatedAt: Long = System.currentTimeMillis(),
     var averageRating: Double = 0.0,
