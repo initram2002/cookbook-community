@@ -98,7 +98,15 @@ class FirestoreRecipeRepository(
         Recipe.DIETARY_RESTRICTION to dietaryRestrictions,
         Recipe.INGREDIENTS to ingredients.map { it.toMap() },
         Recipe.STEPS to steps.map { it.toMap() },
+
         Recipe.ORIGINAL_RECIPE_ID to originalRecipeId,
+        Recipe.ORIGINAL_RECIPE_TITLE to originalRecipeTitle,
+        Recipe.ORIGINAL_RECIPE_IMAGE_URI to originalRecipeImageUri,
+        Recipe.ORIGINAL_AUTHOR_ID to originalAuthorId,
+        Recipe.ORIGINAL_AUTHOR_DISPLAY_NAME to originalAuthorDisplayName,
+        Recipe.ORIGINAL_AUTHOR_PHOTO_URL to originalAuthorPhotoUrl,
+        Recipe.ADAPTATION_NOTE to adaptationNote,
+
         Recipe.CREATED_AT to createdAt,
         Recipe.UPDATED_AT to updatedAt,
         Recipe.AVERAGE_RATING to averageRating,
