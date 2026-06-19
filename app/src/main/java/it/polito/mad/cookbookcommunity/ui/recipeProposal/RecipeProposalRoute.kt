@@ -264,7 +264,9 @@ fun RecipeProposalRoute(
                 uiState = recipe.toDisplayState(
                     isOwnerView = uiState.isOwner,
                     showDeleteConfirm = uiState.showDeleteConfirm,
-                    authorDisplayName = uiState.authorDisplayName
+                    authorDisplayName = uiState.authorDisplayName,
+                    originalRecipe = uiState.originalRecipe,
+                    isOriginalRecipeLoading = uiState.isOriginalRecipeLoading
                 ),
                 onEvent = viewModel::onEvent,
                 onBackClick = onBackClick,

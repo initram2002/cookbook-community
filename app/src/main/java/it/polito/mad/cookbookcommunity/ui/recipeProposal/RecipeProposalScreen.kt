@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import it.polito.mad.cookbookcommunity.model.recipe.IngredientItem
 import it.polito.mad.cookbookcommunity.model.recipe.IngredientUnit
 import it.polito.mad.cookbookcommunity.model.recipe.InstructionStep
+import it.polito.mad.cookbookcommunity.ui.components.recipeproposal.RecipeDerivationCard
 import it.polito.mad.cookbookcommunity.ui.components.recipeproposal.RecipeImageContent
 import it.polito.mad.cookbookcommunity.viewmodel.RecipeProposalDisplayState
 import it.polito.mad.cookbookcommunity.viewmodel.RecipeProposalUiEvent
@@ -114,6 +115,23 @@ fun RecipeProposalScreen(
                 authorDisplayName = uiState.authorDisplayName,
                 onAuthorProfileClick = onAuthorProfileClick
             )
+        }
+
+        if (!uiState.originalRecipeId.isNullOrBlank()) {
+            item {
+                RecipeDerivationCard(
+                    originalRecipeTitle = uiState.originalRecipeTitle,
+                    originalRecipeUri = uiState.originalRecipeImageUri,
+                    originalAuthorName = uiState.originalAuthorDisplayName,
+                    originalAuthorPhotoUrl = uiState.originalAuthorPhotoUrl,
+                    adaptationNote = uiState.adaptationNote,
+                    isOriginalRecipeAvailable = uiState.isOriginalRecipeAvailable,
+                    isOriginalRecipeLoading = uiState.isOriginalRecipeLoading,
+                    isOriginalAuthorAvailable = uiState.originalAuthorId.isNotBlank(),
+                    onOriginalRecipeClick = {},
+                    onOriginalAuthorClick = {}
+                )
+            }
         }
 
         item {

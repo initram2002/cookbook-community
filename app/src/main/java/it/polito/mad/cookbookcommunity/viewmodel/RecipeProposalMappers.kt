@@ -28,13 +28,46 @@ data class RecipeProposalDisplayState(
     val canAddReview: Boolean,
     val showReviewsSection: Boolean,
     val showTipsSection: Boolean,
+
+    val originalRecipeId: String?,
+    val originalRecipeTitle: String,
+    val originalRecipeImageUri: String,
+    val originalAuthorId: String,
+    val originalAuthorDisplayName: String,
+    val originalAuthorPhotoUrl: String,
+    val adaptationNote: String,
+    val isOriginalRecipeAvailable: Boolean,
+    val isOriginalRecipeLoading: Boolean,
+
     val showDeleteConfirm: Boolean = false
 )
 fun RecipeProposal.toDisplayState(
     isOwnerView: Boolean = true,
     showDeleteConfirm: Boolean = false,
-    authorDisplayName: String? = null
+    authorDisplayName: String? = null,
+    originalRecipe: RecipeProposal? = null,
+    isOriginalRecipeLoading: Boolean = false
 ): RecipeProposalDisplayState {
+    val resolvedOriginalRecipeTitle = originalRecipe?.title
+        ?.takeIf { it.isNotBlank() }
+        ?: this.originalRecipeTitle
+
+    val resolvedOriginalRecipeImageUri = originalRecipe?.imageUri
+        ?.takeIf { it.isNotBlank() }
+        ?: this.originalRecipeImageUri
+
+    val resolvedOriginalAuthorId = originalRecipe?.ownerId
+        ?.takeIf { it.isNotBlank() }
+        ?: this.originalAuthorId
+
+    val resolvedOriginalAuthorDisplayName = originalRecipe?.ownerDisplayName
+        ?.takeIf { it.isNotBlank() }
+        ?: this.originalAuthorDisplayName
+
+    val resolvedOriginalAuthorPhotoUrl = originalRecipe?.ownerPhotoUrl
+        ?.takeIf { it.isNotBlank() }
+        ?: this.originalAuthorPhotoUrl
+
     return RecipeProposalDisplayState(
         ownerId = ownerId,
         authorDisplayName = authorDisplayName?.takeIf { it.isNotBlank() } ?: "User $ownerId",
@@ -67,6 +100,15 @@ fun RecipeProposal.toDisplayState(
         canAddReview = !isOwnerView,
         showReviewsSection = true,
         showTipsSection = true,
+        originalRecipeId = this.originalRecipeId,
+        originalRecipeTitle = resolvedOriginalRecipeTitle,
+        originalRecipeImageUri = resolvedOriginalRecipeImageUri,
+        originalAuthorId = resolvedOriginalAuthorId,
+        originalAuthorDisplayName = resolvedOriginalAuthorDisplayName,
+        originalAuthorPhotoUrl = resolvedOriginalAuthorPhotoUrl,
+        adaptationNote = adaptationNote,
+        isOriginalRecipeAvailable = originalRecipe != null,
+        isOriginalRecipeLoading = isOriginalRecipeLoading,
         showDeleteConfirm = showDeleteConfirm
     )
 }
