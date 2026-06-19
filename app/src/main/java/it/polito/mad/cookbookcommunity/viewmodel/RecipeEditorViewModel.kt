@@ -17,6 +17,7 @@ import it.polito.mad.cookbookcommunity.model.recipe.RecipeType
 import it.polito.mad.cookbookcommunity.model.recipe.normalizedForUnit
 import it.polito.mad.cookbookcommunity.model.recipe.requiresQuantity
 import it.polito.mad.cookbookcommunity.session.SessionManager
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -88,6 +89,8 @@ data class RecipeEditorUiState(
 
 data class RecipeProposalUiState(
     val recipe: RecipeProposal? = null,
+    val originalRecipe: RecipeProposal? = null,
+    val isOriginalRecipeLoading: Boolean = false,
     val authorDisplayName: String? = null,
     val screenMode: RecipeProposalScreenMode = RecipeProposalScreenMode.VIEW,
     val editState: RecipeEditorUiState? = null,
@@ -177,6 +180,10 @@ class RecipeEditorViewModel(
     private val _uiState = MutableStateFlow(RecipeProposalUiState())
     val uiState: StateFlow<RecipeProposalUiState> = _uiState.asStateFlow()
 
+    private var recipeObservationJob: Job? = null
+    private var originalRecipeObservationJob: Job? = null
+    private var observedOriginalRecipeId: String? = null
+
     fun onEvent(event: RecipeProposalUiEvent) {
         when (event) {
             is RecipeProposalUiEvent.LoadRecipe -> loadRecipeInternal(event.recipeId)
@@ -212,7 +219,11 @@ class RecipeEditorViewModel(
     }
 
     private fun loadRecipeInternal(id: String) {
-        viewModelScope.launch {
+        recipeObservationJob?.cancel()
+        originalRecipeObservationJob?.cancel()
+        observedOriginalRecipeId = null
+
+        recipeObservationJob = viewModelScope.launch {
             recipeRepository.getRecipeProposalById(id).collect { recipe ->
                 val authorDisplayName = recipe?.ownerId?.let { ownerId ->
                     userProfileRepository.getUserById(ownerId)?.displayName()
@@ -229,7 +240,61 @@ class RecipeEditorViewModel(
                         )
                     }
                 }
+
+                observeOriginalRecipe(recipe?.originalRecipeId)
             }
+        }
+    }
+
+    private fun observeOriginalRecipe(originalRecipeId: String?) {
+        val normalizedOriginalRecipeId = originalRecipeId?.takeIf { it.isNotBlank() }
+
+        if (
+            normalizedOriginalRecipeId == observedOriginalRecipeId &&
+            originalRecipeObservationJob?.isActive == true
+        ) {
+            return
+        }
+
+        originalRecipeObservationJob?.cancel()
+        observedOriginalRecipeId = normalizedOriginalRecipeId
+
+        if (normalizedOriginalRecipeId == null) {
+            _uiState.update { state ->
+                state.copy(
+                    originalRecipe = null,
+                    isOriginalRecipeLoading = false
+                )
+            }
+            return
+        }
+
+        _uiState.update { state ->
+            if (state.recipe?.originalRecipeId != normalizedOriginalRecipeId) {
+                state
+            } else {
+                state.copy(
+                    originalRecipe = null,
+                    isOriginalRecipeLoading = true
+                )
+            }
+        }
+
+        originalRecipeObservationJob = viewModelScope.launch {
+            recipeRepository
+                .getRecipeProposalById(normalizedOriginalRecipeId)
+                .collect { originalRecipe ->
+                    _uiState.update { state ->
+                        if (state.recipe?.originalRecipeId != normalizedOriginalRecipeId) {
+                            state
+                        } else {
+                            state.copy(
+                                originalRecipe = originalRecipe,
+                                isOriginalRecipeLoading = false
+                            )
+                        }
+                    }
+                }
         }
     }
 
