@@ -81,6 +81,19 @@ internal fun NavGraphBuilder.recipeGraph(
                     appNavigation.navigateToOtherProfile(userId)
                 }
             },
+            onOriginalRecipeClick = { originalRecipeId ->
+                appNavigation.navigateToRecipeDetail(
+                    recipeId = originalRecipeId,
+                    fromList = false
+                )
+            },
+            onOriginalAuthorClick = { originalAuthorId ->
+                if (originalAuthorId == SessionManager.CURRENT_LOGGED_IN_USER_ID) {
+                    appNavigation.navigateToOwnProfileFromContent()
+                } else {
+                    appNavigation.navigateToOtherProfile(originalAuthorId)
+                }
+            },
             onSaveToCollectionClick = { recipeId ->
                 navigateIfLoggedIn(PostLoginDestination.SAVED) {
                     appNavigation.navigateToSaveToCollection(recipeId)

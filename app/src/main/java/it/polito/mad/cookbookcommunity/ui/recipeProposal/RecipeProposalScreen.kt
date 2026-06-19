@@ -61,6 +61,8 @@ fun RecipeProposalScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit = {},
     onAuthorProfileClick: (String) -> Unit = {},
+    onOriginalRecipeClick: (String) -> Unit = {},
+    onOriginalAuthorClick: (String) -> Unit = {},
     onSeeAllReviewsClick: () -> Unit = {},
     reviewPreviews: List<ReviewPreviewUiState> = emptyList(),
     tipPreviews: List<TipPreviewUiState> = emptyList(),
@@ -128,8 +130,16 @@ fun RecipeProposalScreen(
                     isOriginalRecipeAvailable = uiState.isOriginalRecipeAvailable,
                     isOriginalRecipeLoading = uiState.isOriginalRecipeLoading,
                     isOriginalAuthorAvailable = uiState.originalAuthorId.isNotBlank(),
-                    onOriginalRecipeClick = {},
-                    onOriginalAuthorClick = {}
+                    onOriginalRecipeClick = {
+                        uiState.originalRecipeId
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let(onOriginalRecipeClick)
+                    },
+                    onOriginalAuthorClick = {
+                        uiState.originalAuthorId
+                            .takeIf { it.isNotBlank() }
+                            ?.let(onOriginalAuthorClick)
+                    }
                 )
             }
         }

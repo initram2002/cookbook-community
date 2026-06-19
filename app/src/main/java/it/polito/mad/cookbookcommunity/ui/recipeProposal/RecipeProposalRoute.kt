@@ -52,6 +52,8 @@ fun RecipeProposalRoute(
     onOpenInEditModeConsumed: () -> Unit = {},
     onDuplicateClick: (String) -> Unit = {},
     onAuthorProfileClick: (String) -> Unit = {},
+    onOriginalRecipeClick: (String) -> Unit = {},
+    onOriginalAuthorClick: (String) -> Unit = {},
     onSaveToCollectionClick: (recipeId: String) -> Unit = {},
     onAddReviewClick: (recipeId: String, reviewId: String?) -> Unit = { _, _ -> },
     onAddTipClick: (recipeId: String) -> Unit = {},
@@ -272,6 +274,8 @@ fun RecipeProposalRoute(
                 onBackClick = onBackClick,
                 modifier = modifier,
                 onAuthorProfileClick = onAuthorProfileClick,
+                onOriginalRecipeClick = onOriginalRecipeClick,
+                onOriginalAuthorClick = onOriginalAuthorClick,
                 onSeeAllReviewsClick = {
                     onSeeAllReviewsClick(recipe.id)
                 },
