@@ -521,7 +521,14 @@ class NewRecipeProposalViewModel(
                     text = step.text.trim()
                 )
             },
-            originalRecipeId = form.originalRecipeId
+
+            originalRecipeId = form.originalRecipeId,
+            originalRecipeTitle = form.originalRecipeTitle,
+            originalRecipeImageUri = form.originalRecipeImageUri,
+            originalAuthorId = form.originalAuthorId,
+            originalAuthorDisplayName = form.originalAuthorDisplayName,
+            originalAuthorPhotoUrl = form.originalAuthorPhotoUrl,
+            adaptationNote = form.adaptationNote.trim()
         )
 
         _uiState.update {
