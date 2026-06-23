@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "687930259487-bgtuvvp6ic93lhlhnl1o21re6vloblg7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.polito.mad.cookbookcommunity",
+            "certificate_hash": "63ed9d1910ab556a22d3648b66c7284bd331819c"
+          }
+        },
+        {
           "client_id": "687930259487-dba38jre69cui8ijh4jlt0494sbmjb7t.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

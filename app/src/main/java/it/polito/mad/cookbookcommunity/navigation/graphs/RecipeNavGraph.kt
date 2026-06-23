@@ -82,10 +82,7 @@ internal fun NavGraphBuilder.recipeGraph(
                 }
             },
             onOriginalRecipeClick = { originalRecipeId ->
-                appNavigation.navigateToRecipeDetail(
-                    recipeId = originalRecipeId,
-                    fromList = false
-                )
+                appNavigation.navigateToOriginalRecipe(originalRecipeId)
             },
             onOriginalAuthorClick = { originalAuthorId ->
                 if (originalAuthorId == SessionManager.CURRENT_LOGGED_IN_USER_ID) {

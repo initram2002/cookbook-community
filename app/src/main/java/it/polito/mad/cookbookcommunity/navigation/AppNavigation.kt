@@ -233,4 +233,8 @@ class AppNavigation(private val navController: NavController) {
             launchSingleTop = true
         }
     }
+
+    fun navigateToOriginalRecipe(recipeId: String) {
+        navController.navigate(RecipeDetailRoute(recipeId, false))
+    }
 }
