@@ -72,6 +72,20 @@ class FirestoreUserRepository : UserRepository {
         val existingProfile = getUserById(authUser.uid)
 
         if (existingProfile != null) {
+            val shouldBackfillGooglePhoto =
+                existingProfile.profileImage.isMonogram &&
+                        authUser.photoUrl.isNotBlank()
+
+            if (shouldBackfillGooglePhoto) {
+                val updatedProfile = existingProfile.copy(
+                    profileImage = ProfileImage.localUri(authUser.photoUrl)
+                )
+
+                updateUser(updatedProfile)
+
+                return updatedProfile
+            }
+
             return existingProfile
         }
 
