@@ -53,6 +53,7 @@ import it.polito.mad.cookbookcommunity.model.profile.ProfileImageType
 import it.polito.mad.cookbookcommunity.model.profile.SocialLink
 import it.polito.mad.cookbookcommunity.model.profile.UserProfile
 import it.polito.mad.cookbookcommunity.model.profile.label
+import it.polito.mad.cookbookcommunity.ui.profile.SharedProfileImage
 import it.polito.mad.cookbookcommunity.ui.profile.profileAvatarDrawableResIdOrNull
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -198,11 +199,24 @@ fun ProfileImage(userData: UserProfile, modifier: Modifier = Modifier) {
         }
 
         ProfileImageType.LOCAL_URI -> {
-            AsyncImage(
-                model = image.value,
+            SharedProfileImage(
+                value = image.value,
                 contentDescription = "Profile picture",
                 contentScale = ContentScale.Crop,
-                modifier = commonModifier
+                modifier = commonModifier,
+                fallback = {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = commonModifier.background(MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Text(
+                            text = userData.initials,
+                            style = MaterialTheme.typography.headlineLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             )
         }
     }

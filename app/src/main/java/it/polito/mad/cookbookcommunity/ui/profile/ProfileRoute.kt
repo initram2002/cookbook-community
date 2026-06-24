@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +24,7 @@ import it.polito.mad.cookbookcommunity.model.profile.ProfileImage
 import it.polito.mad.cookbookcommunity.viewmodel.ProfileUiEvent
 import it.polito.mad.cookbookcommunity.viewmodel.ProfileViewModel
 import it.polito.mad.cookbookcommunity.viewmodel.ProfileViewModelFactory
+import kotlinx.coroutines.launch
 import java.io.File
 
 @Composable
@@ -62,6 +64,7 @@ fun ProfileRoute(
     }
 
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var pendingCameraImageUri by remember { mutableStateOf<Uri?>(null) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -75,11 +78,15 @@ fun ProfileRoute(
                 )
             }
 
-            viewModel.onEvent(
-                ProfileUiEvent.ProfileImageChanged(
-                    ProfileImage.localUri(uri.toString())
-                )
-            )
+            scope.launch {
+                context.toSharedProfileImageDataUri(uri)?.let { sharedImageValue ->
+                    viewModel.onEvent(
+                        ProfileUiEvent.ProfileImageChanged(
+                            ProfileImage.localUri(sharedImageValue)
+                        )
+                    )
+                }
+            }
         }
     }
 
@@ -89,11 +96,15 @@ fun ProfileRoute(
         val uri = pendingCameraImageUri
 
         if (success && uri != null) {
-            viewModel.onEvent(
-                ProfileUiEvent.ProfileImageChanged(
-                    ProfileImage.localUri(uri.toString())
-                )
-            )
+            scope.launch {
+                context.toSharedProfileImageDataUri(uri)?.let { sharedImageValue ->
+                    viewModel.onEvent(
+                        ProfileUiEvent.ProfileImageChanged(
+                            ProfileImage.localUri(sharedImageValue)
+                        )
+                    )
+                }
+            }
         }
 
         pendingCameraImageUri = null
@@ -109,7 +120,33 @@ fun ProfileRoute(
         EditProfileScreen(
             uiState = uiState,
             editState = editState,
-            onEvent = viewModel::onEvent,
+            onEvent = { event ->
+                if (event == ProfileUiEvent.SaveEditRequested) {
+                    val currentImage = uiState.editState?.formData?.profileImage
+
+                    if (currentImage != null && currentImage.needsSharedProfileImageConversion()) {
+                        scope.launch {
+                            val sharedImageValue = context.toSharedProfileImageDataUri(
+                                Uri.parse(currentImage.value)
+                            )
+
+                            if (sharedImageValue != null) {
+                                viewModel.onEvent(
+                                    ProfileUiEvent.ProfileImageChanged(
+                                        ProfileImage.localUri(sharedImageValue)
+                                    )
+                                )
+                            }
+
+                            viewModel.onEvent(ProfileUiEvent.SaveEditRequested)
+                        }
+                    } else {
+                        viewModel.onEvent(event)
+                    }
+                } else {
+                    viewModel.onEvent(event)
+                }
+            },
             onCancelEdit = {
                 viewModel.onEvent(ProfileUiEvent.CancelEditRequested)
             },
