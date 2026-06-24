@@ -32,16 +32,20 @@ class FirestoreReviewRepository(
     override fun getReviewsByRecipe(recipeId: String): Flow<List<Review>> =
         collection
             .whereEqualTo(ReviewFirestore.RECIPE_ID, recipeId)
-            .orderBy(ReviewFirestore.CREATED_AT, Query.Direction.DESCENDING)
             .snapshots()
-            .map { snapshot -> snapshot.toObjects<Review>()}
+            .map { snapshot ->
+                snapshot.toObjects<Review>()
+                    .sortedByDescending { review -> review.createdAt }
+            }
 
     override fun getReviewsByAuthor(authorId: String): Flow<List<Review>> =
         collection
             .whereEqualTo(ReviewFirestore.AUTHOR_ID, authorId)
-            .orderBy(ReviewFirestore.CREATED_AT, Query.Direction.DESCENDING)
             .snapshots()
-            .map { snapshot -> snapshot.toObjects<Review>()}
+            .map { snapshot ->
+                snapshot.toObjects<Review>()
+                    .sortedByDescending { review -> review.createdAt }
+            }
 
     override fun getAverageRating(recipeId: String): Flow<Double?> =
         getReviewsByRecipe(recipeId)
