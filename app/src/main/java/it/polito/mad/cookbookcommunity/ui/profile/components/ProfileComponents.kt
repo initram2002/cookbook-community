@@ -43,7 +43,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -369,12 +371,14 @@ private fun MyAndTriedRecipes(
     ) {
         CollectionCard(
             title = "My recipes",
+            backgroundAssetPath = "img_published.jpg",
             modifier = Modifier.weight(1f),
             onClick = onMyRecipesClick
         )
 
         CollectionCard(
             title = "Diary",
+            backgroundAssetPath = "img_diary.jpg",
             modifier = Modifier.weight(1f),
             onClick = onTriedRecipesClick
         )
@@ -394,6 +398,7 @@ private fun OverviewCollections(
         CollectionCard(
             title = "Saved",
             modifier = Modifier.weight(1f),
+            backgroundAssetPath = "img_saved.jpg",
             height = 100.dp,
             onClick = onSavedCollectionsClick
         )
@@ -401,6 +406,7 @@ private fun OverviewCollections(
         CollectionCard(
             title = "Diary",
             modifier = Modifier.weight(1f),
+            backgroundAssetPath = "img_diary.jpg",
             height = 100.dp,
             onClick = onTriedRecipesClick
         )
@@ -408,6 +414,7 @@ private fun OverviewCollections(
         CollectionCard(
             title = "Published",
             modifier = Modifier.weight(1f),
+            backgroundAssetPath = "img_published.jpg",
             height = 100.dp,
             onClick = onPublishedRecipesClick
         )
@@ -419,6 +426,7 @@ private fun CollectionCard(
     title: String,
     modifier: Modifier = Modifier,
     height: Dp = 120.dp,
+    backgroundAssetPath: String? = null,
     onClick: () -> Unit
 ) {
     Card(
@@ -432,10 +440,29 @@ private fun CollectionCard(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
+            if (backgroundAssetPath != null) {
+                AsyncImage(
+                    model = "file:///android_asset/$backgroundAssetPath",
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .blur(radius = 4.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.35f))
+                )
+            }
             Text(
                 text = title,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.labelLarge
+                style = MaterialTheme.typography.labelLarge,
+                color = if (backgroundAssetPath != null) Color.White
+                else MaterialTheme.colorScheme.onSurface,
+                fontWeight = if (backgroundAssetPath != null) FontWeight.Bold
+                else FontWeight.Normal
             )
         }
     }
