@@ -1,5 +1,16 @@
 package it.polito.mad.cookbookcommunity.ui.recipeProposal
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import it.polito.mad.cookbookcommunity.ui.profile.toSharedProfileImageDataUri
+import kotlinx.coroutines.launch
+import java.io.File
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.activity.compose.BackHandler
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -44,6 +55,42 @@ fun NewRecipeProposalRoute(
             }
         }
     )
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var pendingCameraImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+            scope.launch {
+                context.toSharedProfileImageDataUri(uri)?.let { dataUri ->
+                    viewModel.onEvent(NewRecipeEvent.ImageUriChanged(dataUri))
+                }
+            }
+        }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        val uri = pendingCameraImageUri
+        if (success && uri != null) {
+            scope.launch {
+                context.toSharedProfileImageDataUri(uri)?.let { dataUri ->
+                    viewModel.onEvent(NewRecipeEvent.ImageUriChanged(dataUri))
+                }
+            }
+        }
+        pendingCameraImageUri = null
+    }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -146,11 +193,32 @@ fun NewRecipeProposalRoute(
     NewRecipeProposalScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
-        onBackClick = {
-            requestExitFromWizard()
-        },
+        onBackClick = { requestExitFromWizard() },
         modifier = modifier,
         showBackOnFirstStep = sourceRecipeId != null,
-        title = if (sourceRecipeId != null) "Adapt recipe" else "New recipe"
+        title = if (sourceRecipeId != null) "Adapt recipe" else "New recipe",
+        onPickImageFromGallery = {
+            galleryLauncher.launch(arrayOf("image/*"))
+        },
+        onTakeRecipePhoto = {
+            val uri = createRecipeImageUri(context)
+            pendingCameraImageUri = uri
+            cameraLauncher.launch(uri)
+        }
+    )
+
+}
+
+private fun createRecipeImageUri(context: Context): Uri {
+    val imagesDir = File(context.filesDir, "recipe_images").apply { mkdirs() }
+    val imageFile = File.createTempFile(
+        "recipe_${System.currentTimeMillis()}_",
+        ".jpg",
+        imagesDir
+    )
+    return FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.provider",
+        imageFile
     )
 }

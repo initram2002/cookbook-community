@@ -30,7 +30,9 @@ fun NewRecipeProposalScreen(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     showBackOnFirstStep: Boolean = false,
-    title: String = "New recipe"
+    title: String = "New recipe",
+    onPickImageFromGallery: () -> Unit = {},
+    onTakeRecipePhoto: () -> Unit = {}
 ) {
 
     Scaffold(
@@ -65,7 +67,9 @@ fun NewRecipeProposalScreen(
                     NewRecipeStep.BASIC_INFO   -> BasicInfoStep(
                         form = uiState.form,
                         errors = uiState.errors,
-                        onEvent = onEvent
+                        onEvent = onEvent,
+                        onPickImageFromGallery = onPickImageFromGallery,
+                        onTakeRecipePhoto = onTakeRecipePhoto
                     )
                     NewRecipeStep.INGREDIENTS  -> IngredientsStep(
                         ingredients = uiState.form.ingredients,
@@ -195,7 +199,9 @@ private fun BottomNavButton(
 private fun BasicInfoStep(
     form: NewRecipeFormData,
     errors: NewRecipeErrors,
-    onEvent: (NewRecipeEvent) -> Unit
+    onEvent: (NewRecipeEvent) -> Unit,
+    onPickImageFromGallery: () -> Unit,
+    onTakeRecipePhoto: () -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
@@ -228,9 +234,9 @@ private fun BasicInfoStep(
 
             CoverImagePicker(
                 imageUri = form.imageUri,
-                onPickImageClick = {
-                    onEvent(NewRecipeEvent.ImageUriChanged(nextUri))
-                }
+                onCycleAsset = { onEvent(NewRecipeEvent.ImageUriChanged(nextUri)) },
+                onPickImageFromGallery = onPickImageFromGallery,
+                onTakeRecipePhoto = onTakeRecipePhoto
             )
         }
 
@@ -627,7 +633,9 @@ private fun IngredientRow(
                         readOnly = true,
                         label = { Text("Unit") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = unitExpanded) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
                     )
                     ExposedDropdownMenu(
                         expanded = unitExpanded,
@@ -940,11 +948,16 @@ private fun SectionHeader(title: String, onEditClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CoverImagePicker(
     imageUri: String,
-    onPickImageClick: () -> Unit
+    onCycleAsset: () -> Unit,
+    onPickImageFromGallery: () -> Unit,
+    onTakeRecipePhoto: () -> Unit
 ) {
+    var showSheet by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -961,7 +974,7 @@ private fun CoverImagePicker(
             )
 
             IconButton(
-                onClick = onPickImageClick,
+                onClick = {  showSheet = true },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
@@ -971,12 +984,50 @@ private fun CoverImagePicker(
                     )
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowForward,
+                    imageVector = Icons.Default.CameraAlt,
                     contentDescription = "Change cover image",
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
+    }
+
+    if (showSheet) {
+        ModalBottomSheet(onDismissRequest = { showSheet = false }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp)
+            ){
+                Text(
+                    text = "Change cover image",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 24.dp, top = 12.dp, end = 24.dp, bottom = 20.dp)
+                )
+                HorizontalDivider()
+                listOf(
+                    "Choose from preset images" to { showSheet = false; onCycleAsset() },
+                    "Select from gallery"       to { showSheet = false; onPickImageFromGallery() },
+                    "Take a photo"              to { showSheet = false; onTakeRecipePhoto() }
+                ).forEach { (label, action) ->
+                    TextButton(
+                        onClick = action,
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 18.dp)
+                    ) {
+                        Text(
+                            text = label,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Start,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+        }
+
     }
 }
 
@@ -1055,7 +1106,9 @@ private fun <T> EnumDropdown(
             readOnly = true,
             label = { Text(label) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor().fillMaxWidth()
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { option ->
@@ -1086,7 +1139,9 @@ private fun <T> NullableEnumDropdown(
             readOnly = true,
             label = { Text(label) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor().fillMaxWidth()
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(text = { Text("None") }, onClick = { onSelected(null); expanded = false })

@@ -3,4 +3,7 @@
     <files-path
         name="profile_images"
         path="profile_images" />
+    <files-path
+        name="recipe_images"
+        path="recipe_images" />
 </paths>
