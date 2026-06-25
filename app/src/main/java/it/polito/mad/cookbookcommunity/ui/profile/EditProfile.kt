@@ -688,11 +688,24 @@ private fun ProfileImagePreview(
         }
 
         ProfileImageType.LOCAL_URI -> {
-            AsyncImage(
-                model = profileImage.value,
+            SharedProfileImage(
+                value = profileImage.value,
                 contentDescription = "Profile picture",
                 contentScale = ContentScale.Crop,
-                modifier = avatarModifier
+                modifier = avatarModifier,
+                fallback = {
+                    Box(
+                        modifier = avatarModifier,
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = initials,
+                            style = MaterialTheme.typography.displaySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             )
         }
     }
