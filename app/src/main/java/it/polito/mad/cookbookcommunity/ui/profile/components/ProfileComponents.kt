@@ -352,6 +352,7 @@ fun Collections(
 
         CollectionCard(
             title = "Published Recipes",
+            backgroundAssetPath = "img_published.jpg",
             onClick = onMyRecipesClick,
             modifier = Modifier
                 .fillMaxWidth(0.95f)
