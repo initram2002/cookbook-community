@@ -3,6 +3,21 @@ package it.polito.mad.cookbookcommunity.model.profile
 import it.polito.mad.cookbookcommunity.model.recipe.CuisineType
 import it.polito.mad.cookbookcommunity.model.recipe.DietaryRestriction
 
+private val presetAvatarKeys = setOf(
+    "avatar_1",
+    "avatar_2",
+    "avatar_3"
+)
+
+private fun String.toProfileImage(): ProfileImage {
+    val normalizedValue = trim()
+
+    return when {
+        normalizedValue.isBlank() -> ProfileImage.Monogram
+        normalizedValue in presetAvatarKeys -> ProfileImage.presetAvatar(normalizedValue)
+        else -> ProfileImage.localUri(normalizedValue)
+    }
+}
 fun UserData.toUserProfile(): UserProfile {
     return UserProfile(
         internalId = id,
@@ -23,13 +38,9 @@ fun UserData.toUserProfile(): UserProfile {
             favoriteIngredients = favoriteIngredients,
             allergies = allergies
         ),
-        profileImage = if (photoUrl.isNotBlank())
-            ProfileImage.localUri(photoUrl)
-        else
-            ProfileImage.Monogram
+        profileImage = photoUrl.toProfileImage()
     )
 }
-
 fun UserProfile.toUserData(
     existingCreatedAt: Long = 0L
 ): UserData {
