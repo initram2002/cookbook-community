@@ -238,7 +238,7 @@ fun RecipeProposalRoute(
         recipe == null -> {
             RecipeProposalRoutePlaceholder(
                 title = "Loading...",
-                body = "Fetching recipe $recipeId",
+                body="Loading recipe...",
                 modifier = modifier
             )
         }
