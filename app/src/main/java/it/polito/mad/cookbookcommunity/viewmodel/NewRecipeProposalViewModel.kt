@@ -541,6 +541,7 @@ class NewRecipeProposalViewModel(
         viewModelScope.launch {
             try {
                 repository.addRecipeProposal(recipe)
+
                 _uiState.update {
                     it.copy(
                         isSaving = false,

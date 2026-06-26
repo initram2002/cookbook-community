@@ -16,6 +16,7 @@ class DeleteRecipeProposalUseCase(
     private val triedRecipeRepository: TriedRecipeRepository,
 ) {
     suspend operator fun invoke(recipeId: String) {
+
         reviewRepository.deleteReviewsByRecipe(recipeId)
         recipeRepository.deleteRecipeProposal(recipeId)
         favoriteRepository.removeRecipeFromAllFavorites(recipeId)

@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import it.polito.mad.cookbookcommunity.ui.profile.SharedProfileImage
 
 @Composable
 fun RecipeImageContent(
@@ -24,7 +24,7 @@ fun RecipeImageContent(
     modifier: Modifier = Modifier,
     placeholderText: String = "Recipe cover"
 ) {
-    if (imageUri.isBlank()) {
+    val placeholder: @Composable () -> Unit = {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -44,12 +44,17 @@ fun RecipeImageContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+
+    if (imageUri.isBlank()) {
+        placeholder()
     } else {
-        AsyncImage(
-            model = imageUri,
-            contentDescription = contentDescription,
-            modifier = modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+        SharedProfileImage(
+            value = imageUri,
+            contentDescription = contentDescription ?: "",
+            contentScale = ContentScale.Crop,
+            modifier = modifier,
+            fallback = placeholder
         )
     }
 }

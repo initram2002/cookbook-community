@@ -21,6 +21,7 @@ data class RecipeProposal(
     var ingredients: List<IngredientItem> = emptyList(),
     var steps: List<InstructionStep> = emptyList(),
 
+
     var originalRecipeId: String? = null,
     var originalRecipeTitle: String = "",
     var originalRecipeImageUri: String = "",
