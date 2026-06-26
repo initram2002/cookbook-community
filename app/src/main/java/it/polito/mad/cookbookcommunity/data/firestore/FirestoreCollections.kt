@@ -59,6 +59,7 @@ object FirestoreCollections {
         const val UPDATED_AT                    = "updatedAt"
         const val AVERAGE_RATING                = "averageRating"
         const val REVIEW_COUNT                  = "reviewCount"
+
     }
 
 

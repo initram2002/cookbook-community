@@ -190,6 +190,8 @@ private fun MyRecipeCard(
     onClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
+
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -236,25 +238,9 @@ private fun MyRecipeCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.CallSplit,
-                        contentDescription = "Adaptations",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "0 adaptations",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
 
                 if (isOwnerView) {
                     IconButton(

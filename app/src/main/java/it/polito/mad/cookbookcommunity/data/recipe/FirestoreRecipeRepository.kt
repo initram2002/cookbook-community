@@ -110,7 +110,7 @@ class FirestoreRecipeRepository(
         Recipe.CREATED_AT to createdAt,
         Recipe.UPDATED_AT to updatedAt,
         Recipe.AVERAGE_RATING to averageRating,
-        Recipe.REVIEW_COUNT to reviewCount,
+        Recipe.REVIEW_COUNT to reviewCount
     )
 
     private fun IngredientItem.toMap(): Map<String, Any?> = mapOf(
