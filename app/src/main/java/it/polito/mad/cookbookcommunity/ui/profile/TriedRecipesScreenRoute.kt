@@ -331,17 +331,13 @@ private fun DiaryEntryCard(
                     }
                 }
 
-                if (item.hasFinalPhoto) {
-                    DiaryChip(label = "Final photo")
-                }
-
                 DiaryPreviewSection(
                     title = "Personal note",
                     text = item.personalNotePreview
                 )
 
                 DiaryPreviewSection(
-                    title = "Adaptions",
+                    title = "Adaptations",
                     text = item.modificationsPreview
                 )
             }
