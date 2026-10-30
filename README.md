@@ -17,7 +17,7 @@ Team project for *Mobile Application Development* at Politecnico di Torino (A.Y.
 | :---: | :---: | :---: |
 | <img src="docs/screenshots/home.png" width="230" alt="Home"> | <img src="docs/screenshots/recipe-detail.png" width="230" alt="Recipe detail"> | <img src="docs/screenshots/new-recipe.png" width="230" alt="New recipe"> |
 | **Cooking diary** | **Explore & Filters** | **Notifications** |
-| <img src="docs/screenshots/diary.png" width="230" alt="Cooking diary"> | <img src="docs/screenshots/filters.png" width="230" alt="Explore&Filters"> | <img src="docs/screenshots/notifications.png" width="230" alt="Notifications"> |
+| <img src="docs/screenshots/diary.png" width="230" alt="Cooking diary"> | <img src="docs/screenshots/explore-and-filters.png" width="230" alt="Explore&Filters"> | <img src="docs/screenshots/notifications.png" width="230" alt="Notifications"> |
 
 https://github.com/user-attachments/assets/9f8a5d90-4fdd-4dac-a030-b8737592e418
 
