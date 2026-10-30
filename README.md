@@ -19,7 +19,7 @@ Team project for *Mobile Application Development* at Politecnico di Torino (A.Y.
 | **Cooking diary** | **Collections** | **Notifications** |
 | <img src="docs/screenshots/diary.png" width="230" alt="Cooking diary"> | <img src="docs/screenshots/collections.png" width="230" alt="Collections"> | <img src="docs/screenshots/notifications.png" width="230" alt="Notifications"> |
 
-<!-- DEMO: while editing this file on GitHub, drag & drop a short .mp4 (max 10 MB) on the empty line below to embed an inline player, then delete this comment. -->
+https://github.com/user-attachments/assets/9f8a5d90-4fdd-4dac-a030-b8737592e418
 
 ## Features
 
