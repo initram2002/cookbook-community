@@ -90,27 +90,20 @@ class FirestoreUserRepository : UserRepository {
         }
 
         val displayName = authUser.displayName.trim()
-        val emailPrefix = authUser.email.substringBefore("@").trim()
-        val fallbackName = emailPrefix.ifBlank { "User" }
-
-        val nameSource = displayName.ifBlank { fallbackName }
-        val nameParts = nameSource.split(Regex("\\s+"), limit = 2)
+        val nameParts = displayName.ifBlank { "User" }.split(Regex("\\s+"), limit = 2)
 
         val firstName = nameParts.getOrNull(0).orEmpty().ifBlank { "User" }
         val lastName = nameParts.getOrNull(1).orEmpty()
 
-        val nickname = emailPrefix
-            .ifBlank { firstName.lowercase() }
-            .filter { it.isLetterOrDigit() || it == '.' || it == '_' || it == '-' }
-            .take(30)
-            .ifBlank { "user" }
-
+        val nickname = "$firstName$lastName".lowercase()
+            .filter { it.isLetterOrDigit() }
+            .take(20)
+            .ifBlank { "user" } + authUser.uid.takeLast(4).lowercase()
         val profile = UserProfile(
             internalId = authUser.uid,
             firstName = firstName,
             lastName = lastName,
             nickname = nickname,
-            email = authUser.email,
             phone = null,
             bio = null,
             cookingRole = CookingRole.FOOD_LOVER,

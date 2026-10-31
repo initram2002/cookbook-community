@@ -2,7 +2,6 @@ package it.polito.mad.cookbookcommunity.model.profile
 
 data class UserData(
     val id: String = "",
-    val email: String = "",
     val displayName: String = "",
     val firstName: String = "",
     val lastName: String = "",

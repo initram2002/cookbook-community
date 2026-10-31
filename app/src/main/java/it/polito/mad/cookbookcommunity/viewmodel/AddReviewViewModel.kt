@@ -184,7 +184,6 @@ class AddReviewViewModel(
                     currentUserProfile?.nickname?.trim()?.takeIf { it.isNotBlank() }
                         ?: currentUserProfile?.fullname?.trim()?.takeIf { it.isNotBlank() }
                         ?: currentUser?.displayName?.trim()?.takeIf { it.isNotBlank() }
-                        ?: currentUser?.email?.substringBefore("@")?.trim()?.takeIf { it.isNotBlank() }
                         ?: "User"
 
                 val authorPhotoUrl =

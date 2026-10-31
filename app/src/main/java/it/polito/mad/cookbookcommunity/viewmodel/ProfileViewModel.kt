@@ -11,6 +11,7 @@ import it.polito.mad.cookbookcommunity.model.profile.SocialLink
 import it.polito.mad.cookbookcommunity.model.profile.UserProfile
 import it.polito.mad.cookbookcommunity.model.recipe.CuisineType
 import it.polito.mad.cookbookcommunity.model.recipe.DietaryRestriction
+import it.polito.mad.cookbookcommunity.session.SessionManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +44,7 @@ fun UserProfile.toEditProfileFormData(): EditProfileFormData =
     EditProfileFormData(
         firstName = firstName,
         lastName = lastName,
-        email = email,
+        email = SessionManager.currentUser.value?.email.orEmpty(),
         nickname = nickname,
         phone = phone.orEmpty(),
         bio = bio.orEmpty(),

@@ -24,7 +24,6 @@ fun UserData.toUserProfile(): UserProfile {
         firstName = firstName,
         lastName = lastName,
         nickname = nickname,
-        email = email,
         bio = bio.ifBlank { null },
         cookingRole = runCatching { CookingRole.valueOf(cookingRole) }
             .getOrDefault(CookingRole.FOOD_LOVER),
@@ -46,7 +45,6 @@ fun UserProfile.toUserData(
 ): UserData {
     return UserData(
         id = internalId,
-        email = email,
         displayName = fullname.ifBlank { nickname },
         firstName = firstName,
         lastName = lastName,

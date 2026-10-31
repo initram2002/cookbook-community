@@ -54,7 +54,6 @@ class FirestoreSeedRepository {
         val users = listOf(
             userMap(
                 id                   = loggedUserId,
-                email                = "***REMOVED***",
                 firstName            = "Michela",
                 lastName             = "Martini",
                 nickname             = "michela",
@@ -67,7 +66,6 @@ class FirestoreSeedRepository {
             ),
             userMap(
                 id                   = "2",
-                email                = "***REMOVED***",
                 firstName            = "Fabiana",
                 lastName             = "Fimiani",
                 nickname             = "fabiana",
@@ -80,7 +78,6 @@ class FirestoreSeedRepository {
             ),
             userMap(
                 id                   = "3",
-                email                = "***REMOVED***",
                 firstName            = "Mattia",
                 lastName             = "Riccardi",
                 nickname             = "mattia",
@@ -93,7 +90,6 @@ class FirestoreSeedRepository {
             ),
             userMap(
                 id                   = "4",
-                email                = "***REMOVED***",
                 firstName            = "Antonino",
                 lastName             = "Blancati",
                 nickname             = "antonino",
@@ -116,7 +112,6 @@ class FirestoreSeedRepository {
 
     private fun userMap(
         id: String,
-        email: String,
         firstName: String,
         lastName: String,
         nickname: String,
@@ -128,7 +123,6 @@ class FirestoreSeedRepository {
         allergies: List<String>
     ): Map<String, Any?> = mapOf(
         FirestoreCollections.User.ID                   to id,
-        FirestoreCollections.User.EMAIL                to email,
         FirestoreCollections.User.DISPLAY_NAME         to "$firstName $lastName".trim(),
         FirestoreCollections.User.FIRST_NAME           to firstName,
         FirestoreCollections.User.LAST_NAME            to lastName,
