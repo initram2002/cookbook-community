@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "project-assignment-final-even-g04"
+rootProject.name = "cookbook-community"
 include(":app")
  
