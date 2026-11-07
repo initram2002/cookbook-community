@@ -4,6 +4,7 @@
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.2-7F52FF?logo=kotlin&logoColor=white)
 ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=jetpackcompose&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-FFCA28?logo=firebase&logoColor=black)
+![gitleaks](https://github.com/initram2002/cookbook-community/actions/workflows/gitleaks.yml/badge.svg)
 
 A community-driven recipe-sharing app for Android. Anyone can explore and filter recipes; signed-in users can publish, adapt, review and save them, keep a cooking diary, and get notified when the community interacts with their recipes.
 
