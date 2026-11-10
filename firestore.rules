@@ -1,0 +1,89 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // True only if the signed-in user is the given uid.
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // Reviewers recompute the recipe rating after publishing a review:
+    // allow touching only the two aggregate fields, with sane values.
+    function ratingOnlyUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['averageRating', 'reviewCount'])
+        && request.resource.data.averageRating is number
+        && request.resource.data.averageRating >= 0
+        && request.resource.data.averageRating <= 5
+        && request.resource.data.reviewCount is int
+        && request.resource.data.reviewCount >= 0;
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      // Profiles are public: never accept an email field in them.
+      allow create, update: if isSelf(userId)
+                            && !('email' in request.resource.data);
+      allow delete: if isSelf(userId);
+    }
+
+    match /recipes/{recipeId} {
+      allow read: if true;
+      allow create: if isSelf(request.resource.data.ownerId);
+      allow update: if (isSelf(resource.data.ownerId)
+                        && request.resource.data.ownerId == resource.data.ownerId)
+                    || (signedIn() && ratingOnlyUpdate());
+      allow delete: if isSelf(resource.data.ownerId);
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSelf(request.resource.data.authorId);
+      allow update: if isSelf(resource.data.authorId);
+      // The recipe owner can remove reviews when deleting their recipe.
+      allow delete: if isSelf(resource.data.authorId)
+                    || isSelf(resource.data.recipeOwnerId);
+    }
+
+    match /tips/{tipId} {
+      allow read: if true;
+      allow create: if isSelf(request.resource.data.authorId);
+      allow update, delete: if isSelf(resource.data.authorId);
+    }
+
+    match /favorites/{favoriteId} {
+      allow read: if signedIn();
+      allow create: if isSelf(request.resource.data.userId);
+      allow update: if isSelf(resource.data.userId);
+      // The recipe owner can clean up favorites when deleting their recipe.
+      allow delete: if isSelf(resource.data.userId)
+                    || isSelf(resource.data.recipeOwnerId);
+    }
+
+    match /favoriteCollections/{collectionId} {
+      allow read: if true;
+      // At startup the app creates the default "Saved Recipes" collection,
+      // possibly before sign-in: allow only that exact document, only on creation.
+      allow create: if isSelf(request.resource.data.ownerId)
+                    || (request.resource.data.isSystem == true
+                        && collectionId == 'saved_recipes_' + request.resource.data.ownerId);
+      allow update, delete: if isSelf(resource.data.ownerId);
+    }
+
+    match /notifications/{notificationId} {
+      allow read, update, delete: if isSelf(resource.data.recipientUserId);
+      allow create: if isSelf(request.resource.data.actorUserId);
+    }
+
+    match /triedRecipes/{triedRecipeId} {
+      allow read: if signedIn();
+      allow create: if isSelf(request.resource.data.userId);
+      allow update, delete: if isSelf(resource.data.userId);
+    }
+  }
+}
