@@ -20,7 +20,7 @@ Team project for *Mobile Application Development* at Politecnico di Torino (A.Y.
 | **Cooking diary** | **Explore & Filters** | **Notifications** |
 | <img src="docs/screenshots/diary.png" width="230" alt="Cooking diary"> | <img src="docs/screenshots/explore-and-filters.png" width="230" alt="Explore&Filters"> | <img src="docs/screenshots/notifications.png" width="230" alt="Notifications"> |
 
-https://github.com/user-attachments/assets/9f8a5d90-4fdd-4dac-a030-b8737592e418
+https://github.com/user-attachments/assets/24dae8ac-6357-4e75-9cae-368d81f85897
 
 ## Features
 
@@ -85,8 +85,11 @@ This was a highly collaborative project: instead of splitting the app by feature
 
 ## Team
 
-Built by Group 04 for *Mobile Application Development*, Politecnico di Torino. See the contributors list for everyone involved.
+Built by Group 04 for *Mobile Application Development* at Politecnico di Torino:
 
-<!-- Optional: list teammates' GitHub profiles here, e.g. [@handle](https://github.com/handle) -->
+- Antonino Blancato ([@BlancatoAntonino](https://github.com/BlancatoAntonino))
+- Fabiana Fimiani ([@FABIANA1211](https://github.com/FABIANA1211))
+- Michela Martini ([@initram2002](https://github.com/initram2002))
+- Mattia Riccardi ([@MattiaRiccardi](https://github.com/MattiaRiccardi))
 
 [Project presentation (PDF)](presentation.pdf)
